@@ -51,6 +51,7 @@ name = "aes_verification"
 version = "0.1.0"
 dependencies = [
  "aead 0.4.3",
+ "aes",
  "aes-gcm",
  "hex",
  "rand",

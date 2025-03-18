@@ -14,32 +14,32 @@ pub struct TLSRecord {
     pub blocks_to_extract: Vec<u32>  // blocks to extract
 }
 
-// Http Response
+// HTTP Packet
 #[derive(Debug, Serialize, Deserialize)]
-pub struct HttpResponse {
+pub struct HTTPPacket {
     pub aes_key: String,  // aes key for encrypting/decrypting
-    pub records: Vec<TLSRecord>,  // TLS Records, constructing full http response
+    pub records: Vec<TLSRecord>,  // TLS Records, constructing full http packet
 }
 
 // Data to verify
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VerifyingData {
-    pub responses: Vec<HttpResponse> // Http Responses
+    pub packets: Vec<HTTPPacket> // HTTP Packet 
 }
 
-// verify full http response ciphertext
-pub fn verify_full_http_response_ciphertext(json_content: String) -> Vec<String> {
+// verify full http packet ciphertext
+pub fn verify_full_http_packet_ciphertext(json_content: String) -> Vec<String> {
     let verifying_data: VerifyingData = serde_json::from_str(&json_content).unwrap();
 
-    let mut all_response = vec![];
-    for response in verifying_data.responses.iter() {
-        let mut response_msg: String = String::new();
-        let aes_key = &response.aes_key;
+    let mut all_packet = vec![];
+    for packet in verifying_data.packets.iter() {
+        let mut packet_msg: String = String::new();
+        let aes_key = &packet.aes_key;
         let aes_key = hex::decode(aes_key).unwrap();
         
         let cipher = Aes128Gcm::new_from_slice(&aes_key).unwrap();
 
-        for record in response.records.iter() {
+        for record in packet.records.iter() {
             let nonce = hex::decode(&record.nonce).unwrap();
             let nonce: [u8; 12] = nonce.try_into().unwrap();
             let nonce = Nonce::from(nonce);
@@ -50,11 +50,11 @@ pub fn verify_full_http_response_ciphertext(json_content: String) -> Vec<String>
             cipher.decrypt_in_place_detached(&nonce, aad.as_slice(), &mut ciphertext, tag.as_slice().into()).unwrap();
 
             let msg = String::from_utf8_lossy(ciphertext.as_slice());
-            response_msg += &msg;
+            packet_msg += &msg;
         }
 
-        all_response.push(response_msg);
+        all_packet.push(packet_msg);
     }
-    all_response
+    all_packet
 }
 
