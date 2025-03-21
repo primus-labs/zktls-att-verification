@@ -1,11 +1,14 @@
-use zktls_att_verification::verification_data;
-use verification_data::{VerifyingData, VerifyingDataOpt};
-use std::fs;
-use aes::{Aes128, cipher::{KeyInit, BlockEncrypt, BlockDecrypt, generic_array::GenericArray}};
-use rand::RngCore;
+use aes::{
+    cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit},
+    Aes128,
+};
 use anyhow::Result;
+use rand::RngCore;
+use std::fs;
+use verification_data::{VerifyingData, VerifyingDataOpt};
+use zktls_att_verification::verification_data;
 
-fn test_full_aes_verification(verifying_key: &str) -> Result<()>{
+fn test_full_aes_verification(verifying_key: &str) -> Result<()> {
     let json_content = fs::read_to_string("./examples/full_http_responses.json")?;
     println!("jsonContent: {}", json_content);
     let verifying_data: VerifyingData = serde_json::from_str(&json_content)?;
