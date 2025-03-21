@@ -44,7 +44,6 @@ impl ECDSAVerifier {
     }
 
     pub fn verify(&self, message: Vec<u8>, signature: &str) -> bool {
-        println!("verify signature: {}", signature);
         let signature = Signature::from_str(signature).unwrap();
         match self.verifying_key.verify(&message, &signature) {
             Ok(()) => true,

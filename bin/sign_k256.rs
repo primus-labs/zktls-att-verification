@@ -23,6 +23,7 @@ fn main() {
     println!("sign key {}:{:?}", signing_key.to_bytes().len(), signing_key.to_bytes());
 
     let msg_content = fs::read_to_string(args.msg_file).unwrap();
+    let msg_content = msg_content.trim();
     let message = hex::decode(&msg_content).unwrap();
     let signature: Signature = signing_key.try_sign(&message).unwrap();
     println!("signature {}: {:?}", signature.to_vec().len(), signature.to_vec());

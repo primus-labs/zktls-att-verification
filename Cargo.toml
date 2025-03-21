@@ -27,3 +27,7 @@ path = "bin/sign_k256.rs"
 [[bin]]
 name = "test_verification"
 path = "bin/test_verification.rs"
+
+[[bin]]
+name = "benchmark"
+path = "bin/benchmark.rs"

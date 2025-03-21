@@ -112,6 +112,7 @@ impl VerifyingDataOpt {
             }
             // let mut file = File::create_new("tmp/partial_msg.txt").unwrap();
             // write!(file, "{}", hex::encode(&to_sign_data));
+            // println!("to sign data: {}", hex::encode(&to_sign_data));
             all_packet.push(packet_msg);
         }
         all_packet
