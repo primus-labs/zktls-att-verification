@@ -17,7 +17,7 @@ fn main() -> Result<()> {
         signing_key.to_bytes().len(),
         signing_key.to_bytes()
     );
-    let mut signing_key_file = File::create_new("examples/signing_key_k256.txt")?;
+    let mut signing_key_file = File::create_new("keys/signing_key_k256.txt")?;
     write!(signing_key_file, "{}", hex::encode(signing_key.to_bytes()))?;
 
     let verifying_key: VerifyingKey = VerifyingKey::from(&signing_key);
@@ -26,7 +26,7 @@ fn main() -> Result<()> {
         verifying_key.to_bytes().len(),
         verifying_key.to_bytes()
     );
-    let mut verifying_key_file = File::create_new("examples/verifying_key_k256.txt")?;
+    let mut verifying_key_file = File::create_new("keys/verifying_key_k256.txt")?;
     write!(
         verifying_key_file,
         "{}",

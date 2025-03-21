@@ -4,7 +4,7 @@ use anyhow::Result;
 
 impl VerifyingData {
     // verify full http packet ciphertext, see `examples/full_http_responses.json` for the format of `json_content`
-    pub fn verify_ciphertext(&self) -> Result<Vec<String>> {
+    pub fn verify_ciphertext(&self) -> Result<bool> {
         let mut all_packet = vec![];
         for packet in self.packets.iter() {
             let mut packet_msg: String = String::new();
@@ -26,7 +26,7 @@ impl VerifyingData {
 
             all_packet.push(packet_msg);
         }
-        Ok(all_packet)
+        Ok(true)
     }
 }
 
@@ -88,7 +88,7 @@ fn compute_counter(
 
 impl VerifyingDataOpt {
     // verify partial http packet, See `examples/partial_http_responses.json` for the format of `json_content`
-    pub fn verify_ciphertext(&self) -> Result<Vec<String>> {
+    pub fn verify_ciphertext(&self) -> Result<bool> {
         let mut all_packet = vec![];
         for packet in self.packets.iter() {
             let mut packet_msg: String = String::new();
@@ -113,6 +113,6 @@ impl VerifyingDataOpt {
             }
             all_packet.push(packet_msg);
         }
-        Ok(all_packet)
+        Ok(true)
     }
 }

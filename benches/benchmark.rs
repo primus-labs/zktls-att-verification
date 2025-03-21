@@ -20,10 +20,10 @@ fn test_partial_aes_verification(verifying_key: &str, filename: &str) -> Result<
 }
 
 fn main() -> Result<()> {
-    let public_key = fs::read_to_string("examples/verifying_key_k256.txt")?;
-    test_partial_aes_verification(&public_key, "./benches/bench16.json")?;
-    test_partial_aes_verification(&public_key, "./benches/bench256.json")?;
-    test_partial_aes_verification(&public_key, "./benches/bench1024.json")?;
-    test_partial_aes_verification(&public_key, "./benches/bench2048.json")?;
+    let public_key = fs::read_to_string("keys/verifying_key_k256.txt")?;
+    test_partial_aes_verification(&public_key, "./data/bench16.json")?;
+    test_partial_aes_verification(&public_key, "./data/bench256.json")?;
+    test_partial_aes_verification(&public_key, "./data/bench1024.json")?;
+    test_partial_aes_verification(&public_key, "./data/bench2048.json")?;
     Ok(())
 }

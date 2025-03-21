@@ -9,27 +9,19 @@ use verification_data::{VerifyingData, VerifyingDataOpt};
 use zktls_att_verification::verification_data;
 
 fn test_full_aes_verification(verifying_key: &str) -> Result<()> {
-    let json_content = fs::read_to_string("./examples/full_http_responses.json")?;
+    let json_content = fs::read_to_string("./data/full_http_responses.json")?;
     println!("jsonContent: {}", json_content);
     let verifying_data: VerifyingData = serde_json::from_str(&json_content)?;
-    let msg = verifying_data.verify_ciphertext()?;
-    for m in msg.iter() {
-        println!("decrypted msg: {}", m);
-    }
-    let result = verifying_data.verify_signature(verifying_key)?;
+    let result = verifying_data.verify(verifying_key)?;
     println!("verify signature: {}", result);
     Ok(())
 }
 
 fn test_partial_aes_verification(verifying_key: &str) -> Result<()> {
-    let json_content = fs::read_to_string("./examples/partial_http_responses.json")?;
+    let json_content = fs::read_to_string("./data/partial_http_responses.json")?;
     println!("jsonContent: {}", json_content);
     let verifying_data: VerifyingDataOpt = serde_json::from_str(&json_content)?;
-    let msg = verifying_data.verify_ciphertext()?;
-    for m in msg.iter() {
-        println!("decrypted msg: {}", m);
-    }
-    let result = verifying_data.verify_signature(verifying_key)?;
+    let result = verifying_data.verify(verifying_key)?;
     println!("verify signature: {}", result);
     Ok(())
 }
@@ -54,7 +46,7 @@ fn _test_aes_ecb() {
 }
 
 fn main() -> Result<()> {
-    let public_key = fs::read_to_string("examples/verifying_key_k256.txt")?;
+    let public_key = fs::read_to_string("keys/verifying_key_k256.txt")?;
     test_full_aes_verification(&public_key)?;
     // test_aes_ecb();
     test_partial_aes_verification(&public_key)?;

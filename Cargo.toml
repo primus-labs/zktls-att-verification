@@ -25,10 +25,10 @@ path = "bin/keygen_k256.rs"
 name = "sign_k256"
 path = "bin/sign_k256.rs"
 
-[[bin]]
+[[example]]
 name = "test_verification"
-path = "bin/test_verification.rs"
+path = "examples/test_verification.rs"
 
 [[bin]]
 name = "benchmark"
-path = "bin/benchmark.rs"
+path = "benches/benchmark.rs"
