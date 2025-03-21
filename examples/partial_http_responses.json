@@ -2,6 +2,7 @@
     "packets":[
         {
             "aes_key":"baeef9428b6ba92aa95f1334a587305a",
+            "ecdsa_signature": "52f9dd26de59a7f688315df9767a901c8ff843034bc75b982fc70055145a7e9e03f811dd040887dbc8038f616a340fc1c2a9cbdce1b71528311af60bf3ec4867",
             "records":[
                 {
                     "ciphertext":"acfce57f5582039def95c0d210cfdd5154e83668263eda77",
