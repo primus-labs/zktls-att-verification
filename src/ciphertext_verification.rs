@@ -1,41 +1,33 @@
 use crate::aes_utils::{Aes128GcmDecryptor, Aes128Encryptor};
 use crate::verification_data::{VerifyingData, VerifyingDataOpt, BlockInfo};
+use anyhow::Result;
 
 impl VerifyingData {
     // verify full http packet ciphertext, see `examples/full_http_responses.json` for the format of `json_content`
-    pub fn verify_ciphertext(&self) -> Vec<String> {
+    pub fn verify_ciphertext(&self) -> Result<Vec<String>> {
         let mut all_packet = vec![];
         for packet in self.packets.iter() {
             let mut packet_msg: String = String::new();
             let aes_key = &packet.aes_key;
-            let cipher = Aes128GcmDecryptor::from_hex(&aes_key);
+            let cipher = Aes128GcmDecryptor::from_hex(&aes_key)?;
     
-            // let mut to_sign_data = vec![];
             for record in packet.records.iter() {
-                let nonce = hex::decode(&record.nonce).unwrap();
+                let nonce = hex::decode(&record.nonce)?;
     
-                // to_sign_data.extend(&nonce);
+                let aad = hex::decode(&record.aad)?;
+                let tag = hex::decode(&record.tag)?;
+                let mut ciphertext = hex::decode(&record.ciphertext)?;
     
-                let aad = hex::decode(&record.aad).unwrap();
-                let tag = hex::decode(&record.tag).unwrap();
-                let mut ciphertext = hex::decode(&record.ciphertext).unwrap();
-    
-                // to_sign_data.extend(&ciphertext);
-                // to_sign_data.extend(&tag);
-    
-                let decrypted_msg = cipher.decrypt(&nonce, &aad, &mut ciphertext, &tag);
+                let decrypted_msg = cipher.decrypt(&nonce, &aad, &mut ciphertext, &tag)?;
     
                 let msg = String::from_utf8_lossy(decrypted_msg.as_slice());
                 packet_msg += &msg;
     
             }
     
-            // let mut file = File::create_new("tmp/full_msg.txt").unwrap();
-            // write!(file, "{}", hex::encode(&to_sign_data));
-    
             all_packet.push(packet_msg);
         }
-        all_packet
+        Ok(all_packet)
     }
 
 }
@@ -56,7 +48,7 @@ fn incr_nonce(nonce: &mut [u8; 4]) {
 }
 
 // compute necessary counter according `blocks`
-fn compute_counter(cipher: &Aes128Encryptor, nonce: &Vec<u8>, blocks: &Vec<BlockInfo>, len: usize) -> Vec<u8>{
+fn compute_counter(cipher: &Aes128Encryptor, nonce: &Vec<u8>, blocks: &Vec<BlockInfo>, len: usize) -> Result<Vec<u8>>{
     let mut result: Vec<u8> = vec![];
     let mut nonce_index: [u8; 4] = [0u8; 4];
 
@@ -74,35 +66,31 @@ fn compute_counter(cipher: &Aes128Encryptor, nonce: &Vec<u8>, blocks: &Vec<Block
             let mut full_nonce = nonce.clone();
             full_nonce.extend(nonce_index);
 
-            // let mut full_nonce = *GenericArray::from_slice(full_nonce.as_slice());
-            let full_nonce = cipher.encrypt(&mut full_nonce);
+            let full_nonce = cipher.encrypt(&mut full_nonce)?;
             let masked_data: Vec<u8> = full_nonce.into_iter().zip(mask.iter()).filter(|(_a, b)| *b == &1u8).map(|(a, _b)| a).collect();
             result.extend(masked_data);
 
             block_index += 1;
         }
     }
-    result
+    Ok(result)
 }
 
 impl VerifyingDataOpt {
     // verify partial http packet, See `examples/partial_http_responses.json` for the format of `json_content`
-    pub fn verify_ciphertext(&self) -> Vec<String> {
+    pub fn verify_ciphertext(&self) -> Result<Vec<String>> {
         let mut all_packet = vec![];
         for packet in self.packets.iter() {
             let mut packet_msg: String = String::new();
             let aes_key = &packet.aes_key;
     
-            let cipher = Aes128Encryptor::from_hex(aes_key);
+            let cipher = Aes128Encryptor::from_hex(aes_key)?;
     
-            // let mut to_sign_data = vec![];
             for record in packet.records.iter() {
-                let nonce = hex::decode(&record.nonce).unwrap();
-                let ciphertext = hex::decode(&record.ciphertext).unwrap();
-                // to_sign_data.extend(&nonce);
-                // to_sign_data.extend(&ciphertext);
+                let nonce = hex::decode(&record.nonce)?;
+                let ciphertext = hex::decode(&record.ciphertext)?;
     
-                let counters = compute_counter(&cipher, &nonce, &record.blocks, ciphertext.len());
+                let counters = compute_counter(&cipher, &nonce, &record.blocks, ciphertext.len())?;
                 assert!(ciphertext.len() == counters.len());
     
                 let decrypted_msg: Vec<u8> = counters.iter().zip(ciphertext.iter()).map(|(a, b)| a ^ b).collect();
@@ -110,11 +98,8 @@ impl VerifyingDataOpt {
                 packet_msg += &decrypted_msg;
     
             }
-            // let mut file = File::create_new("tmp/partial_msg.txt").unwrap();
-            // write!(file, "{}", hex::encode(&to_sign_data));
-            // println!("to sign data: {}", hex::encode(&to_sign_data));
             all_packet.push(packet_msg);
         }
-        all_packet
+        Ok(all_packet)
     }
 }
