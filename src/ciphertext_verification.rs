@@ -3,7 +3,7 @@ use crate::verification_data::{BlockInfo, VerifyingData, VerifyingDataOpt};
 use anyhow::Result;
 
 impl VerifyingData {
-    // verify full http packet ciphertext, see `examples/full_http_responses.json` for the format of `json_content`
+    // verify full http packet ciphertext
     pub fn verify_ciphertext(&self) -> Result<bool> {
         let mut all_packet = vec![];
         for packet in self.packets.iter() {
@@ -87,7 +87,7 @@ fn compute_counter(
 }
 
 impl VerifyingDataOpt {
-    // verify partial http packet, See `examples/partial_http_responses.json` for the format of `json_content`
+    // verify partial http packet`
     pub fn verify_ciphertext(&self) -> Result<bool> {
         let mut all_packet = vec![];
         for packet in self.packets.iter() {
