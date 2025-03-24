@@ -3,6 +3,9 @@ use crate::verification_data::{VerifyingData, VerifyingDataOpt};
 use anyhow::Result;
 
 impl VerifyingData {
+    // verify ecdsa signature for VerifyingData
+    // the format of the message to be signed should be:
+    // [record0_nonce, record0_ciphertext, record0_tag, ..., recordN_nonce, recordN_ciphertext, recordN_tag]
     pub fn verify_signature(&self, verifying_key: &str) -> Result<bool> {
         let verifier = ECDSAVerifier::from_hex(verifying_key)?;
 
@@ -30,6 +33,9 @@ impl VerifyingData {
 }
 
 impl VerifyingDataOpt {
+    // verifying ecdsa signature for VerifyingDataOpt
+    // the format of the message to be signed should be:
+    // [record0_nonce, record0_ciphertext, ..., recordN_nonce, recordN_ciphertext]
     pub fn verify_signature(&self, verifying_key: &str) -> Result<bool> {
         let verifier = ECDSAVerifier::from_hex(verifying_key)?;
 

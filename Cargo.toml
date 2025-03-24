@@ -17,6 +17,19 @@ k256 = "0.10"
 sha2 = "0.9"
 structopt = "0.3"
 
+[dev-dependencies]
+criterion = "0.5"
+
+[profile.bench]
+opt-level = 3
+debug = false
+split-debuginfo = "unpacked"
+lto = true
+
+[[bench]]
+name = "benchmark"
+harness = false
+
 [[bin]]
 name = "keygen_k256"
 path = "bin/keygen_k256.rs"
@@ -26,9 +39,6 @@ name = "sign_k256"
 path = "bin/sign_k256.rs"
 
 [[example]]
-name = "test_verification"
-path = "examples/test_verification.rs"
+name = "verification_example"
+path = "examples/verification_example.rs"
 
-[[bin]]
-name = "benchmark"
-path = "benches/benchmark.rs"
