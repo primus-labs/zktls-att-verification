@@ -1,4 +1,4 @@
-# ZK-Att-Verification
+# zkTLS-Att-Verification
 
 ## Introduction
 This Repository provides functionality for verifying ECDSA signature and AES ciphertext. For ECDSA signature, the underlying elliptic curve is Secp256k1. The AES ciphertext is outputed using AES-128-GCM.
