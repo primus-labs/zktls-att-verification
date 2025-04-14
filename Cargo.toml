@@ -15,10 +15,14 @@ anyhow = "1.0"
 
 k256 = "0.10.0"
 sha2 = "0.10.8"
-structopt = "0.3"
+structopt = {version = "0.3", optional =  true}
 
 [dev-dependencies]
 criterion = "0.5"
+
+[features]
+default = []
+bin-feature = ["structopt"]
 
 [profile.bench]
 opt-level = 3
@@ -33,10 +37,12 @@ harness = false
 [[bin]]
 name = "keygen_k256"
 path = "bin/keygen_k256.rs"
+required-features = ["bin-feature"]
 
 [[bin]]
 name = "sign_k256"
 path = "bin/sign_k256.rs"
+required-features = ["bin-feature"]
 
 [[example]]
 name = "verification_example"
