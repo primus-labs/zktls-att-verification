@@ -27,7 +27,7 @@ impl ECDSASigner {
 
     // construct ECDSASigner from bytes
     pub fn from_bytes(bytes: Vec<u8>) -> Result<ECDSASigner> {
-        let key: SigningKey = SigningKey::from_bytes(&bytes)?;
+        let key: SigningKey = SigningKey::from_slice(&bytes)?;
         Ok(ECDSASigner { signing_key: key })
     }
 
@@ -70,7 +70,7 @@ impl ECDSAVerifier {
     // construct ECDSAVerifier from ECDSASigner
     pub fn from_signer(signer: &ECDSASigner) -> Result<ECDSAVerifier> {
         let signing_key = signer.to_bytes();
-        let signing_key = SigningKey::from_bytes(&signing_key)?;
+        let signing_key = SigningKey::from_slice(&signing_key)?;
 
         let verifying_key: VerifyingKey = VerifyingKey::from(signing_key);
         Ok(ECDSAVerifier { verifying_key })
@@ -78,7 +78,7 @@ impl ECDSAVerifier {
 
     // output verifying key in bytes
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.verifying_key.to_bytes().to_vec()
+        self.verifying_key.to_sec1_bytes().to_vec()
     }
 
     // output verifying key in hex
