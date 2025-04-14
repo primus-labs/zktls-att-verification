@@ -9,7 +9,7 @@ impl VerifyingData {
         for packet in self.packets.iter() {
             let mut packet_msg: String = String::new();
             let aes_key = &packet.aes_key;
-            let cipher = Aes128GcmDecryptor::from_hex(&aes_key)?;
+            let cipher = Aes128GcmDecryptor::from_hex(aes_key)?;
 
             for record in packet.records.iter() {
                 let nonce = hex::decode(&record.nonce)?;
@@ -38,7 +38,7 @@ fn incr_nonce(nonce: &mut [u8; 4]) {
             nonce[index as usize] = 0;
             index -= 1;
         } else {
-            nonce[index as usize] = nonce[index as usize] + 1;
+            nonce[index as usize] += 1;
             break;
         }
     }
@@ -47,8 +47,8 @@ fn incr_nonce(nonce: &mut [u8; 4]) {
 // compute necessary counter according `blocks`
 fn compute_counter(
     cipher: &Aes128Encryptor,
-    nonce: &Vec<u8>,
-    blocks: &Vec<BlockInfo>,
+    nonce: &[u8],
+    blocks: &[BlockInfo],
     len: usize,
 ) -> Result<Vec<u8>> {
     let mut result: Vec<u8> = vec![];
@@ -68,7 +68,7 @@ fn compute_counter(
         let nonce_u32: u32 = u32::from_be_bytes(nonce_index);
         if nonce_u32 as usize == blocks[block_index].id + 2 {
             let mask = &blocks[block_index].mask;
-            let mut full_nonce = nonce.clone();
+            let mut full_nonce = nonce.to_vec();
             full_nonce.extend(nonce_index);
 
             let full_nonce = cipher.encrypt(&mut full_nonce)?;

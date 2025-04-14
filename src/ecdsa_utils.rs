@@ -44,7 +44,7 @@ impl ECDSASigner {
 
     // output signing key in hex
     pub fn to_hex(&self) -> String {
-        hex::encode(&self.to_bytes())
+        hex::encode(self.to_bytes())
     }
 
     // sign message using underlying signing key
@@ -83,7 +83,7 @@ impl ECDSAVerifier {
 
     // output verifying key in hex
     pub fn to_hex(&self) -> String {
-        hex::encode(&self.to_bytes())
+        hex::encode(self.to_bytes())
     }
 
     // verify signature using underlying verifying key

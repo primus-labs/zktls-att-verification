@@ -28,7 +28,7 @@ impl VerifyingData {
                 return Ok(false);
             }
         }
-        return Ok(true);
+        Ok(true)
     }
 }
 
@@ -56,6 +56,6 @@ impl VerifyingDataOpt {
                 return Ok(false);
             }
         }
-        return Ok(true);
+        Ok(true)
     }
 }

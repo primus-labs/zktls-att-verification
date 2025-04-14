@@ -59,7 +59,7 @@ impl Aes128Encryptor {
     }
 
     // encrypt one block
-    pub fn encrypt(&self, msg: &mut Vec<u8>) -> Result<Vec<u8>> {
+    pub fn encrypt(&self, msg: &mut [u8]) -> Result<Vec<u8>> {
         let mut msg = *GenericArray::from_slice(msg);
         self.cipher.encrypt_block(&mut msg);
         Ok(msg.to_vec())

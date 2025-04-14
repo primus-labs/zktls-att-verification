@@ -1,5 +1,4 @@
 use anyhow::Result;
-use hex;
 use std::fs;
 use zktls_att_verification::ecdsa_utils::ECDSASigner;
 
@@ -21,12 +20,12 @@ fn main() -> Result<()> {
     // load signing key
     let signing_key = fs::read_to_string(key_file)?;
     let signing_key = signing_key.trim();
-    let signer = ECDSASigner::from_hex(&signing_key)?;
+    let signer = ECDSASigner::from_hex(signing_key)?;
 
     // load message to be signed
     let msg_content = fs::read_to_string(msg_file)?;
     let msg_content = msg_content.trim();
-    let message = hex::decode(&msg_content)?;
+    let message = hex::decode(msg_content)?;
 
     // sign message
     let signature = signer.sign(message)?;
