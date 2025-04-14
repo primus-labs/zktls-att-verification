@@ -21,7 +21,7 @@ impl ECDSASigner {
     // construct ECDSASigner from random bytes
     pub fn new() -> Result<ECDSASigner> {
         let mut key: [u8; 32] = [0u8; 32];
-        rand::rng().fill_bytes(&mut key);
+        rand::thread_rng().fill_bytes(&mut key);
         Self::from_bytes(key.to_vec())
     }
 
