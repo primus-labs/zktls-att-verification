@@ -14,7 +14,6 @@ pub struct TLSRecord {
 // HTTP Packet
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacket {
-    pub aes_key: String,         // aes key for encrypting/decrypting
     pub ecdsa_signature: String, // ecdsa signature
     pub records: Vec<TLSRecord>, // TLS Records, constructing full http packet
 }
@@ -23,6 +22,7 @@ pub struct HTTPPacket {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VerifyingData {
     pub packets: Vec<HTTPPacket>, // HTTP Packet
+    pub aes_key: String,         // aes key for encrypting/decrypting
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -40,13 +40,18 @@ pub struct TLSRecordOpt {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacketOpt {
-    pub aes_key: String,            // aes key for decrypting http packet
-    pub messages: Vec<String>,      // plaintext for checking aes decryption
     pub ecdsa_signature: String,    // ecdsa signature
     pub records: Vec<TLSRecordOpt>, // TLS Records, construct partial http packet
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct PacketMessage {
+    pub record_messages: Vec<String>, // plaintext in one packet
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct VerifyingDataOpt {
     pub packets: Vec<HTTPPacketOpt>, // partial HTTP Packet
+    pub aes_key: String,            // aes key for decrypting http packet
+    pub packet_messages: Vec<PacketMessage>,      // plaintext for checking aes decryption
 }

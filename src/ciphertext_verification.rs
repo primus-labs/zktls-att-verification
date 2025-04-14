@@ -1,15 +1,16 @@
 use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
-use crate::verification_data::{BlockInfo, TLSRecordOpt, VerifyingData, VerifyingDataOpt};
+use crate::verification_data::{BlockInfo, PacketMessage, TLSRecordOpt, HTTPPacketOpt, VerifyingData, VerifyingDataOpt};
 use anyhow::Result;
 
 impl VerifyingData {
     // verify full http packet ciphertext
     pub fn verify_ciphertext(&self) -> Result<bool> {
+        let aes_key = &self.aes_key;
+        let cipher = Aes128GcmDecryptor::from_hex(aes_key)?;
+
         let mut all_packet = vec![];
         for packet in self.packets.iter() {
             let mut packet_msg: String = String::new();
-            let aes_key = &packet.aes_key;
-            let cipher = Aes128GcmDecryptor::from_hex(aes_key)?;
 
             for record in packet.records.iter() {
                 let nonce = hex::decode(&record.nonce)?;
@@ -89,15 +90,16 @@ fn compute_counter(
 impl VerifyingDataOpt {
     // verify partial http packet`
     pub fn verify_ciphertext(&self) -> Result<bool> {
+        let aes_key = &self.aes_key;
+        let cipher = Aes128Encryptor::from_hex(aes_key)?;
+
+        let message_packet: Vec<(&PacketMessage, &HTTPPacketOpt)> = self.packet_messages.iter().zip(self.packets.iter()).collect(); 
         let mut all_packet = vec![];
-        for packet in self.packets.iter() {
+        for (pkt_msg, packet) in message_packet.into_iter() {
             let mut packet_msg: String = String::new();
-            let aes_key = &packet.aes_key;
+            let message_record: Vec<(&String, &TLSRecordOpt)> = pkt_msg.record_messages.iter().zip(packet.records.iter()).collect();
 
-            let cipher = Aes128Encryptor::from_hex(aes_key)?;
-            let message_record: Vec<(&String, &TLSRecordOpt)> = packet.messages.iter().zip(packet.records.iter()).collect(); 
-
-            for (message, record) in message_record.into_iter() {
+            for (record_msg, record) in message_record.into_iter() {
                 let nonce = hex::decode(&record.nonce)?;
                 let ciphertext = hex::decode(&record.ciphertext)?;
 
@@ -110,7 +112,7 @@ impl VerifyingDataOpt {
                     .map(|(a, b)| a ^ b)
                     .collect();
                 let decrypted_msg = String::from_utf8_lossy(&decrypted_msg);
-                if *message != decrypted_msg {
+                if *record_msg != decrypted_msg {
                     return Ok(false)
                 }
                 packet_msg += &decrypted_msg;

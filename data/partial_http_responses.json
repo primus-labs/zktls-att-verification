@@ -1,8 +1,12 @@
 {
+    "aes_key":"baeef9428b6ba92aa95f1334a587305a",
+    "packet_messages": [
+        {
+            "record_messages":["BTC11.800329520.59.30.03", "BNB387.47061626", "010.520.1"]
+        }
+    ],
     "packets":[
         {
-            "aes_key":"baeef9428b6ba92aa95f1334a587305a",
-            "messages": ["BTC11.800329520.59.30.03", "BNB387.47061626", "010.520.1"],
             "ecdsa_signature": "52f9dd26de59a7f688315df9767a901c8ff843034bc75b982fc70055145a7e9e03f811dd040887dbc8038f616a340fc1c2a9cbdce1b71528311af60bf3ec4867",
             "records":[
                 {
