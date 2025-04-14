@@ -1,5 +1,5 @@
 use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
-use crate::verification_data::{BlockInfo, VerifyingData, VerifyingDataOpt};
+use crate::verification_data::{BlockInfo, TLSRecordOpt, VerifyingData, VerifyingDataOpt};
 use anyhow::Result;
 
 impl VerifyingData {
@@ -95,8 +95,9 @@ impl VerifyingDataOpt {
             let aes_key = &packet.aes_key;
 
             let cipher = Aes128Encryptor::from_hex(aes_key)?;
+            let message_record: Vec<(&String, &TLSRecordOpt)> = packet.messages.iter().zip(packet.records.iter()).collect(); 
 
-            for record in packet.records.iter() {
+            for (message, record) in message_record.into_iter() {
                 let nonce = hex::decode(&record.nonce)?;
                 let ciphertext = hex::decode(&record.ciphertext)?;
 
@@ -109,6 +110,9 @@ impl VerifyingDataOpt {
                     .map(|(a, b)| a ^ b)
                     .collect();
                 let decrypted_msg = String::from_utf8_lossy(&decrypted_msg);
+                if *message != decrypted_msg {
+                    return Ok(false)
+                }
                 packet_msg += &decrypted_msg;
             }
             all_packet.push(packet_msg);

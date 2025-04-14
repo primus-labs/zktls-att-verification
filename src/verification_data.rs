@@ -41,6 +41,7 @@ pub struct TLSRecordOpt {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacketOpt {
     pub aes_key: String,            // aes key for decrypting http packet
+    pub messages: Vec<String>,      // plaintext for checking aes decryption
     pub ecdsa_signature: String,    // ecdsa signature
     pub records: Vec<TLSRecordOpt>, // TLS Records, construct partial http packet
 }
