@@ -111,9 +111,10 @@ impl VerifyingDataOpt {
                     .zip(ciphertext.iter())
                     .map(|(a, b)| a ^ b)
                     .collect();
+                let hex_msg = hex::encode(&decrypted_msg);
                 let decrypted_msg = String::from_utf8_lossy(&decrypted_msg);
-                if *record_msg != decrypted_msg {
-                    return Ok(false)
+                if *record_msg != hex_msg {
+                    return Ok(false);
                 }
                 packet_msg += &decrypted_msg;
             }
