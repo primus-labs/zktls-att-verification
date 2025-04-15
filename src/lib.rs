@@ -5,7 +5,10 @@ pub mod signature_verification;
 pub mod verification_data;
 
 use anyhow::Result;
-use verification_data::{VerifyingData, VerifyingDataOpt, AesKeyVec, SignatureVec, PacketMessageVec, PacketRecordVec, PacketRecordOptVec};
+use verification_data::{
+    AesKeyVec, PacketMessageVec, PacketRecordOptVec, PacketRecordVec, SignatureVec, VerifyingData,
+    VerifyingDataOpt,
+};
 
 impl VerifyingData {
     // implement verify interface for VerifyingData
@@ -24,12 +27,18 @@ impl VerifyingData {
     }
 
     pub fn get_signatures(&self) -> String {
-        let signatures = SignatureVec::new(self.packets.iter().map(|p| p.ecdsa_signature.clone()).collect());
+        let signatures = SignatureVec::new(
+            self.packets
+                .iter()
+                .map(|p| p.ecdsa_signature.clone())
+                .collect(),
+        );
         serde_json::to_string(&signatures).unwrap()
     }
 
     pub fn get_records(&self) -> String {
-        let records = PacketRecordVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
+        let records =
+            PacketRecordVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
         serde_json::to_string(&records).unwrap()
     }
 }
@@ -52,21 +61,31 @@ impl VerifyingDataOpt {
     }
 
     pub fn get_signatures(&self) -> String {
-        let signatures = SignatureVec::new(self.packets.iter().map(|p| p.ecdsa_signature.clone()).collect());
+        let signatures = SignatureVec::new(
+            self.packets
+                .iter()
+                .map(|p| p.ecdsa_signature.clone())
+                .collect(),
+        );
 
         serde_json::to_string(&signatures).unwrap()
     }
 
     pub fn get_messages(&self) -> String {
-        let messages = PacketMessageVec::new(self.packets.iter().map(|p| p.record_messages.clone()).collect());
+        let messages = PacketMessageVec::new(
+            self.packets
+                .iter()
+                .map(|p| p.record_messages.clone())
+                .collect(),
+        );
 
         serde_json::to_string(&messages).unwrap()
     }
 
     pub fn get_records(&self) -> String {
-        let records = PacketRecordOptVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
+        let records =
+            PacketRecordOptVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
 
         serde_json::to_string(&records).unwrap()
     }
-
 }

@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use hex;
 use k256::ecdsa::{
     signature::{Signer, Verifier},
@@ -89,6 +89,8 @@ impl ECDSAVerifier {
     // verify signature using underlying verifying key
     pub fn verify(&self, message: Vec<u8>, signature: &str) -> Result<()> {
         let signature = Signature::from_str(signature)?;
-        self.verifying_key.verify(&message, &signature).map_err(|e| anyhow!(e))
+        self.verifying_key
+            .verify(&message, &signature)
+            .map_err(|e| anyhow!(e))
     }
 }

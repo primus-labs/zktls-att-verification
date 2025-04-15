@@ -1,6 +1,6 @@
 use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
 use crate::verification_data::{BlockInfo, TLSRecordOpt, VerifyingData, VerifyingDataOpt};
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 
 impl VerifyingData {
     // verify full http packet ciphertext
@@ -87,10 +87,16 @@ impl VerifyingDataOpt {
             let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
             if packet.record_messages.len() != packet.records.len() {
-                return Err(anyhow!("the length of record_messages and records are not the same"));
+                return Err(anyhow!(
+                    "the length of record_messages and records are not the same"
+                ));
             }
 
-            let message_record: Vec<(&String, &TLSRecordOpt)> = packet.record_messages.iter().zip(packet.records.iter()).collect();
+            let message_record: Vec<(&String, &TLSRecordOpt)> = packet
+                .record_messages
+                .iter()
+                .zip(packet.records.iter())
+                .collect();
             for (record_msg, record) in message_record.into_iter() {
                 let nonce = hex::decode(&record.nonce)?;
                 let ciphertext = hex::decode(&record.ciphertext)?;

@@ -40,10 +40,10 @@ pub struct TLSRecordOpt {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacketOpt {
-    pub aes_key: String,            // aes key for decrypting http packet
+    pub aes_key: String,              // aes key for decrypting http packet
     pub record_messages: Vec<String>, // plaintext in one packet
-    pub ecdsa_signature: String,    // ecdsa signature
-    pub records: Vec<TLSRecordOpt>, // TLS Records, construct partial http packet
+    pub ecdsa_signature: String,      // ecdsa signature
+    pub records: Vec<TLSRecordOpt>,   // TLS Records, construct partial http packet
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -53,65 +53,55 @@ pub struct VerifyingDataOpt {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AesKeyVec {
-    pub aes_keys: Vec<String>
+    pub aes_keys: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PacketMessageVec {
-    pub packet_messages: Vec<Vec<String>>
+    pub packet_messages: Vec<Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignatureVec {
-    pub signatures: Vec<String>
+    pub signatures: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PacketRecordOptVec {
-    pub packet_records: Vec<Vec<TLSRecordOpt>>
+    pub packet_records: Vec<Vec<TLSRecordOpt>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PacketRecordVec {
-    pub packet_records: Vec<Vec<TLSRecord>>
+    pub packet_records: Vec<Vec<TLSRecord>>,
 }
 
 impl AesKeyVec {
     pub fn new(aes_keys: Vec<String>) -> AesKeyVec {
-        AesKeyVec {
-            aes_keys
-        }
+        AesKeyVec { aes_keys }
     }
 }
 
 impl SignatureVec {
     pub fn new(signatures: Vec<String>) -> SignatureVec {
-        SignatureVec {
-            signatures
-        }
+        SignatureVec { signatures }
     }
 }
 
 impl PacketMessageVec {
     pub fn new(packet_messages: Vec<Vec<String>>) -> PacketMessageVec {
-        PacketMessageVec {
-            packet_messages
-        }
+        PacketMessageVec { packet_messages }
     }
 }
 
 impl PacketRecordVec {
     pub fn new(packet_records: Vec<Vec<TLSRecord>>) -> PacketRecordVec {
-        PacketRecordVec {
-            packet_records
-        }
+        PacketRecordVec { packet_records }
     }
 }
 
 impl PacketRecordOptVec {
     pub fn new(packet_records: Vec<Vec<TLSRecordOpt>>) -> PacketRecordOptVec {
-        PacketRecordOptVec {
-            packet_records
-        }
+        PacketRecordOptVec { packet_records }
     }
 }
