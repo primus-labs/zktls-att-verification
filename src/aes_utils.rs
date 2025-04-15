@@ -29,13 +29,13 @@ impl Aes128GcmDecryptor {
         aad: &[u8],
         ciphertext: &mut [u8],
         tag: &[u8],
-    ) -> Result<Vec<u8>> {
+    ) -> Result<()> {
         let nonce: [u8; 12] = nonce.try_into()?;
         let nonce = Nonce::from(nonce);
         self.cipher
             .decrypt_in_place_detached(&nonce, aad, ciphertext, tag.into())
             .map_err(|e| anyhow!("decrypt error: {}", e))?;
-        Ok(ciphertext.to_vec())
+        Ok(())
     }
 }
 
@@ -47,8 +47,7 @@ pub struct Aes128Encryptor {
 impl Aes128Encryptor {
     // construct Aes128Encryptor from bytes
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
-        let aes_key = GenericArray::from_slice(&bytes);
-        let cipher = Aes128::new(aes_key);
+        let cipher = Aes128::new_from_slice(&bytes)?;
         Ok(Self { cipher })
     }
 

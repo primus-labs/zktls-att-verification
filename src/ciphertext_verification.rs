@@ -1,14 +1,13 @@
 use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
-use crate::verification_data::{BlockInfo, PacketMessage, TLSRecordOpt, HTTPPacketOpt, VerifyingData, VerifyingDataOpt};
+use crate::verification_data::{BlockInfo, TLSRecordOpt, VerifyingData, VerifyingDataOpt};
 use anyhow::{Result, anyhow};
 
 impl VerifyingData {
     // verify full http packet ciphertext
     pub fn verify_ciphertext(&self) -> Result<()> {
-        let aes_key = &self.aes_key;
-        let cipher = Aes128GcmDecryptor::from_hex(aes_key)?;
-
         for packet in self.packets.iter() {
+            let aes_key = &packet.aes_key;
+            let cipher = Aes128GcmDecryptor::from_hex(aes_key)?;
 
             for record in packet.records.iter() {
                 let nonce = hex::decode(&record.nonce)?;
@@ -83,13 +82,15 @@ fn compute_counter(
 impl VerifyingDataOpt {
     // verify partial http packet`
     pub fn verify_ciphertext(&self) -> Result<()> {
-        let aes_key = &self.aes_key;
-        let cipher = Aes128Encryptor::from_hex(aes_key)?;
+        for packet in self.packets.iter() {
+            let aes_key = &packet.aes_key;
+            let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
-        let message_packet: Vec<(&PacketMessage, &HTTPPacketOpt)> = self.packet_messages.iter().zip(self.packets.iter()).collect(); 
-        for (pkt_msg, packet) in message_packet.into_iter() {
-            let message_record: Vec<(&String, &TLSRecordOpt)> = pkt_msg.record_messages.iter().zip(packet.records.iter()).collect();
+            if packet.record_messages.len() != packet.records.len() {
+                return Err(anyhow!("the length of record_messages and records are not the same"));
+            }
 
+            let message_record: Vec<(&String, &TLSRecordOpt)> = packet.record_messages.iter().zip(packet.records.iter()).collect();
             for (record_msg, record) in message_record.into_iter() {
                 let nonce = hex::decode(&record.nonce)?;
                 let ciphertext = hex::decode(&record.ciphertext)?;
