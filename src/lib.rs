@@ -21,11 +21,13 @@ impl VerifyingData {
         Ok(())
     }
 
+    // get aes keys
     pub fn get_aes_keys(&self) -> String {
         let aes_keys = AesKeyVec::new(self.packets.iter().map(|p| p.aes_key.clone()).collect());
         serde_json::to_string(&aes_keys).unwrap()
     }
 
+    // get signatures
     pub fn get_signatures(&self) -> String {
         let signatures = SignatureVec::new(
             self.packets
@@ -36,6 +38,7 @@ impl VerifyingData {
         serde_json::to_string(&signatures).unwrap()
     }
 
+    // get records
     pub fn get_records(&self) -> String {
         let records =
             PacketRecordVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
@@ -54,12 +57,14 @@ impl VerifyingDataOpt {
         Ok(())
     }
 
+    // get aes keys
     pub fn get_aes_keys(&self) -> String {
         let aes_keys = AesKeyVec::new(self.packets.iter().map(|p| p.aes_key.clone()).collect());
 
         serde_json::to_string(&aes_keys).unwrap()
     }
-
+    
+    // get signatures
     pub fn get_signatures(&self) -> String {
         let signatures = SignatureVec::new(
             self.packets
@@ -71,6 +76,7 @@ impl VerifyingDataOpt {
         serde_json::to_string(&signatures).unwrap()
     }
 
+    // get messages
     pub fn get_messages(&self) -> String {
         let messages = PacketMessageVec::new(
             self.packets
@@ -82,6 +88,7 @@ impl VerifyingDataOpt {
         serde_json::to_string(&messages).unwrap()
     }
 
+    // get records
     pub fn get_records(&self) -> String {
         let records =
             PacketRecordOptVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
