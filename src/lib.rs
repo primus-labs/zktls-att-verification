@@ -5,7 +5,7 @@ pub mod signature_verification;
 pub mod verification_data;
 
 use anyhow::Result;
-use verification_data::{VerifyingData, VerifyingDataOpt};
+use verification_data::{VerifyingData, VerifyingDataOpt, AesKeyVec, SignatureVec, PacketMessageVec, PacketRecordVec, PacketRecordOptVec};
 
 impl VerifyingData {
     // implement verify interface for VerifyingData
@@ -16,6 +16,21 @@ impl VerifyingData {
         // verify aes ciphertext
         self.verify_ciphertext()?;
         Ok(())
+    }
+
+    pub fn get_aes_keys(&self) -> String {
+        let aes_keys = AesKeyVec::new(self.packets.iter().map(|p| p.aes_key.clone()).collect());
+        serde_json::to_string(&aes_keys).unwrap()
+    }
+
+    pub fn get_signatures(&self) -> String {
+        let signatures = SignatureVec::new(self.packets.iter().map(|p| p.ecdsa_signature.clone()).collect());
+        serde_json::to_string(&signatures).unwrap()
+    }
+
+    pub fn get_records(&self) -> String {
+        let records = PacketRecordVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
+        serde_json::to_string(&records).unwrap()
     }
 }
 
@@ -29,4 +44,29 @@ impl VerifyingDataOpt {
         self.verify_ciphertext()?;
         Ok(())
     }
+
+    pub fn get_aes_keys(&self) -> String {
+        let aes_keys = AesKeyVec::new(self.packets.iter().map(|p| p.aes_key.clone()).collect());
+
+        serde_json::to_string(&aes_keys).unwrap()
+    }
+
+    pub fn get_signatures(&self) -> String {
+        let signatures = SignatureVec::new(self.packets.iter().map(|p| p.ecdsa_signature.clone()).collect());
+
+        serde_json::to_string(&signatures).unwrap()
+    }
+
+    pub fn get_messages(&self) -> String {
+        let messages = PacketMessageVec::new(self.packets.iter().map(|p| p.record_messages.clone()).collect());
+
+        serde_json::to_string(&messages).unwrap()
+    }
+
+    pub fn get_records(&self) -> String {
+        let records = PacketRecordOptVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
+
+        serde_json::to_string(&records).unwrap()
+    }
+
 }

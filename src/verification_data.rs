@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 // TLS Record
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TLSRecord {
     pub ciphertext: String,          // tls record ciphertext
     pub nonce: String,               // tls record nonce
@@ -25,13 +25,13 @@ pub struct VerifyingData {
     pub packets: Vec<HTTPPacket>, // HTTP Packet
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BlockInfo {
     pub id: usize,     // block id
     pub mask: Vec<u8>, // block mask, 1u8 indicate this char is extracted
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TLSRecordOpt {
     pub ciphertext: String, // ciphertext in tls record, it is concated according to field `blocks`
     pub nonce: String,      // nonce for decrypting the ciphertext
@@ -49,4 +49,69 @@ pub struct HTTPPacketOpt {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VerifyingDataOpt {
     pub packets: Vec<HTTPPacketOpt>, // partial HTTP Packet
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AesKeyVec {
+    pub aes_keys: Vec<String>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PacketMessageVec {
+    pub packet_messages: Vec<Vec<String>>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SignatureVec {
+    pub signatures: Vec<String>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PacketRecordOptVec {
+    pub packet_records: Vec<Vec<TLSRecordOpt>>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PacketRecordVec {
+    pub packet_records: Vec<Vec<TLSRecord>>
+}
+
+impl AesKeyVec {
+    pub fn new(aes_keys: Vec<String>) -> AesKeyVec {
+        AesKeyVec {
+            aes_keys
+        }
+    }
+}
+
+impl SignatureVec {
+    pub fn new(signatures: Vec<String>) -> SignatureVec {
+        SignatureVec {
+            signatures
+        }
+    }
+}
+
+impl PacketMessageVec {
+    pub fn new(packet_messages: Vec<Vec<String>>) -> PacketMessageVec {
+        PacketMessageVec {
+            packet_messages
+        }
+    }
+}
+
+impl PacketRecordVec {
+    pub fn new(packet_records: Vec<Vec<TLSRecord>>) -> PacketRecordVec {
+        PacketRecordVec {
+            packet_records
+        }
+    }
+}
+
+impl PacketRecordOptVec {
+    pub fn new(packet_records: Vec<Vec<TLSRecordOpt>>) -> PacketRecordOptVec {
+        PacketRecordOptVec {
+            packet_records
+        }
+    }
 }
