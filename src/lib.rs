@@ -9,36 +9,24 @@ use verification_data::{VerifyingData, VerifyingDataOpt};
 
 impl VerifyingData {
     // implement verify interface for VerifyingData
-    pub fn verify(&self, verifying_key: &str) -> Result<bool> {
+    pub fn verify(&self, verifying_key: &str) -> Result<()> {
         // verify ecdsa signature
-        let result = self.verify_signature(verifying_key)?;
-        if !result {
-            return Ok(false);
-        }
+        self.verify_signature(verifying_key)?;
 
         // verify aes ciphertext
-        let result = self.verify_ciphertext()?;
-        if !result {
-            return Ok(false);
-        }
-        Ok(true)
+        self.verify_ciphertext()?;
+        Ok(())
     }
 }
 
 impl VerifyingDataOpt {
     // implement verify interface for VerifyingDataOpt
-    pub fn verify(&self, verifying_key: &str) -> Result<bool> {
+    pub fn verify(&self, verifying_key: &str) -> Result<()> {
         // verify ecdsa signature
-        let result = self.verify_signature(verifying_key)?;
-        if !result {
-            return Ok(false);
-        }
+        self.verify_signature(verifying_key)?;
 
         // verify aes ciphertext
-        let result = self.verify_ciphertext()?;
-        if !result {
-            return Ok(false);
-        }
-        Ok(true)
+        self.verify_ciphertext()?;
+        Ok(())
     }
 }

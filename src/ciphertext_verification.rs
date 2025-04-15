@@ -1,16 +1,14 @@
 use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
 use crate::verification_data::{BlockInfo, PacketMessage, TLSRecordOpt, HTTPPacketOpt, VerifyingData, VerifyingDataOpt};
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 impl VerifyingData {
     // verify full http packet ciphertext
-    pub fn verify_ciphertext(&self) -> Result<bool> {
+    pub fn verify_ciphertext(&self) -> Result<()> {
         let aes_key = &self.aes_key;
         let cipher = Aes128GcmDecryptor::from_hex(aes_key)?;
 
-        let mut all_packet = vec![];
         for packet in self.packets.iter() {
-            let mut packet_msg: String = String::new();
 
             for record in packet.records.iter() {
                 let nonce = hex::decode(&record.nonce)?;
@@ -19,15 +17,10 @@ impl VerifyingData {
                 let tag = hex::decode(&record.tag)?;
                 let mut ciphertext = hex::decode(&record.ciphertext)?;
 
-                let decrypted_msg = cipher.decrypt(&nonce, &aad, &mut ciphertext, &tag)?;
-
-                let msg = String::from_utf8_lossy(decrypted_msg.as_slice());
-                packet_msg += &msg;
+                cipher.decrypt(&nonce, &aad, &mut ciphertext, &tag)?;
             }
-
-            all_packet.push(packet_msg);
         }
-        Ok(true)
+        Ok(())
     }
 }
 
@@ -89,14 +82,12 @@ fn compute_counter(
 
 impl VerifyingDataOpt {
     // verify partial http packet`
-    pub fn verify_ciphertext(&self) -> Result<bool> {
+    pub fn verify_ciphertext(&self) -> Result<()> {
         let aes_key = &self.aes_key;
         let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
         let message_packet: Vec<(&PacketMessage, &HTTPPacketOpt)> = self.packet_messages.iter().zip(self.packets.iter()).collect(); 
-        let mut all_packet = vec![];
         for (pkt_msg, packet) in message_packet.into_iter() {
-            let mut packet_msg: String = String::new();
             let message_record: Vec<(&String, &TLSRecordOpt)> = pkt_msg.record_messages.iter().zip(packet.records.iter()).collect();
 
             for (record_msg, record) in message_record.into_iter() {
@@ -112,14 +103,11 @@ impl VerifyingDataOpt {
                     .map(|(a, b)| a ^ b)
                     .collect();
                 let hex_msg = hex::encode(&decrypted_msg);
-                let decrypted_msg = String::from_utf8_lossy(&decrypted_msg);
                 if *record_msg != hex_msg {
-                    return Ok(false);
+                    return Err(anyhow!("check plaintext failed"));
                 }
-                packet_msg += &decrypted_msg;
             }
-            all_packet.push(packet_msg);
         }
-        Ok(true)
+        Ok(())
     }
 }

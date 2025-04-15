@@ -11,8 +11,10 @@ fn test_full_aes_verification(verifying_key: &str) -> Result<()> {
 
     let verifying_data: VerifyingData = serde_json::from_str(&json_content)?;
     // verify full http response
-    let result = verifying_data.verify(verifying_key)?;
-    println!("verify passed? {}", result);
+    match verifying_data.verify(verifying_key) {
+        Ok(()) => println!("verify passed"),
+        Err(e) => println!("verify failed: {}", e),
+    };
     Ok(())
 }
 
@@ -24,8 +26,10 @@ fn test_partial_aes_verification(verifying_key: &str) -> Result<()> {
 
     let verifying_data: VerifyingDataOpt = serde_json::from_str(&json_content)?;
     // verify parital http response
-    let result = verifying_data.verify(verifying_key)?;
-    println!("verify passed? {}", result);
+    match verifying_data.verify(verifying_key) {
+        Ok(()) => println!("verify passed"),
+        Err(e) => println!("verify failed: {}", e),
+    };
     Ok(())
 }
 
