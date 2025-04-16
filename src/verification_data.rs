@@ -15,6 +15,7 @@ pub struct TLSRecord {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacket {
     pub aes_key: String,         // aes key for encrypting/decrypting
+    pub record_messages: Vec<String>, // plaintext in one packet
     pub ecdsa_signature: String, // ecdsa signature
     pub records: Vec<TLSRecord>, // TLS Records, constructing full http packet
 }

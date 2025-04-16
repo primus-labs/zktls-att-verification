@@ -38,6 +38,18 @@ impl VerifyingData {
         serde_json::to_string(&signatures).unwrap()
     }
 
+    // get messages
+    pub fn get_messages(&self) -> String {
+        let messages = PacketMessageVec::new(
+            self.packets
+                .iter()
+                .map(|p| p.record_messages.clone())
+                .collect(),
+        );
+
+        serde_json::to_string(&messages).unwrap()
+    }
+
     // get records
     pub fn get_records(&self) -> String {
         let records =

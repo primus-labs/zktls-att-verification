@@ -9,7 +9,14 @@ impl VerifyingData {
             let aes_key = &packet.aes_key;
             let cipher = Aes128GcmDecryptor::from_hex(aes_key)?;
 
-            for record in packet.records.iter() {
+            if packet.record_messages.len() != packet.records.len() {
+                return Err(anyhow!(
+                    "the length of record_messages and records are not the same"
+                ));
+            }
+
+            let message_record = packet.record_messages.iter().zip(packet.records.iter());
+            for (message, record) in message_record.into_iter() {
                 let nonce = hex::decode(&record.nonce)?;
 
                 let aad = hex::decode(&record.aad)?;
@@ -17,6 +24,10 @@ impl VerifyingData {
                 let mut ciphertext = hex::decode(&record.ciphertext)?;
 
                 cipher.decrypt(&nonce, &aad, &mut ciphertext, &tag)?;
+                let hex_msg = hex::encode(&ciphertext);
+                if hex_msg != *message {
+                    return Err(anyhow!("check plaintext failed"));
+                }
             }
         }
         Ok(())
