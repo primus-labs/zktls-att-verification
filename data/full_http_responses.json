@@ -11,7 +11,8 @@
                     "aad":"000000000000000517030300eb",
                     "tag":"5cdf7eb722d6ca87cac4d3e299262702",
                     "blocks_to_redact":[6,8,9,10,11,13],
-                    "blocks_to_extract":[6,8,9,10,11,13]
+                    "blocks_to_extract":[6,8,9,10,11,13],
+		    "json_block_positions": [[83, 232]]
                 },
                 {
                     "ciphertext":"cb894c33dab9dadf5a2de165f65002fc3b6ecb2fdd928e272914e34917111ba94552d5e9b58511e142bd2d6a8c94cdab5b2aee7eea502b62694ab3f0d46f487f21ba7508bad6ecdd44",
@@ -19,7 +20,8 @@
                     "aad":"00000000000000061703030049",
                     "tag":"ef432a8c05977513bd671c533ef8f77d",
                     "blocks_to_redact":[0,2,4],
-                    "blocks_to_extract":[4]
+                    "blocks_to_extract":[4],
+		    "json_block_positions": [[4, 70]]
                 },
                 {
                     "ciphertext":"45c50488121f21ed857901373e4f98c26928df28f30bab82f662d47bc24d8bbbe8a87d4055c79028e8a107f6581ca094d0b43ee2d5039e3a1b00",
@@ -27,7 +29,8 @@
                     "aad":"0000000000000007170303003a",
                     "tag":"c2d6bcfa2c48339f740d61327934b9e7",
                     "blocks_to_redact":[1,3],
-                    "blocks_to_extract":[1,3]
+                    "blocks_to_extract":[1,3],
+		    "json_block_positions": [[4, 55]]
                 },
                 {
                     "ciphertext":"2533c1bb737f88764bba9674ba3838f41b31bf98179fdbcf1953ba488548016749779abb9f3a90792df341c61d15a77ace55ad037b39aa41a5c2f9c495895b818ac2a59011b74a145c7c84967ec0a8d8aced7bc14b894dfa7564e06d03be369bba00e77c522fa3dfedf600e645edec8e61aaa9",
@@ -35,7 +38,8 @@
                     "aad":"00000000000000081703030073",
                     "tag":"21baf002d6d26709c365162ef70492a9",
                     "blocks_to_redact":[1,3,4,6],
-                    "blocks_to_extract":[1,3]
+                    "blocks_to_extract":[1,3],
+		    "json_block_positions": [[4, 112]]
                 },
                 {
                     "ciphertext":"b437f10b4b",
@@ -43,7 +47,8 @@
                     "aad":"00000000000000091703030005",
                     "tag":"f9ec159652e28a6fd196d152c7dc67bd",
                     "blocks_to_redact":[],
-                    "blocks_to_extract":[]
+                    "blocks_to_extract":[],
+		    "json_block_positions": []
                 }
             ]
         }

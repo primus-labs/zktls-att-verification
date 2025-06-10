@@ -1,0 +1,29 @@
+{
+    "recipient": "0x7ab44DE0156925fe0c24482a2cDe48C465e47573",
+    "request": {
+        "url": "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true",
+        "header": "",
+        "method": "GET",
+        "body": ""
+    },
+    "reponseResolve": [
+        {
+            "keyName": "screen_name",
+            "parseType": "",
+            "parsePath": "$.screen_name"
+        }
+    ],
+    "data": "{\"screen_name\":\"goose_eggsss\"}",
+    "attConditions": "[{\"op\":\"REVEAL_STRING\",\"field\":\"$.screen_name\"}]",
+    "timestamp": 1749115419123,
+    "additionParams": "{\"algorithmType\":\"proxytls\"}",
+    "attestors": [
+        {
+            "attestorAddr": "0xdb736b13e2f522dbe18b2015d0291e4b193d8ef6",
+            "url": "https://primuslabs.xyz"
+        }
+    ],
+    "signatures": [
+        "0x315b1bfd85f024a16143ac38182e02ffcf6cbf42f4fd6d48b102ca4c22c736a113c3f82bb50e96d54292cdab1e1135e0f5acf2b98078dc68ba5aeac4b71512181c"
+    ]
+}

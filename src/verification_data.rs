@@ -9,6 +9,7 @@ pub struct TLSRecord {
     pub tag: String,                 // tls record tag
     pub blocks_to_redact: Vec<u32>,  // blocks to redact
     pub blocks_to_extract: Vec<u32>, // blocks to extract
+    pub json_block_positions: Vec<Vec<u32>>,    // positions to find json block
 }
 
 // HTTP Packet
@@ -68,6 +69,11 @@ pub struct PacketMessageVec {
     pub packet_messages: Vec<Vec<String>>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JsonMessageVec {
+    pub json_messages: Vec<String>,
+}
+
 // signature wrapper
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignatureVec {
@@ -118,5 +124,11 @@ impl PacketRecordOptVec {
     // PacketRecordOptVec constructor
     pub fn new(packet_records: Vec<Vec<TLSRecordOpt>>) -> PacketRecordOptVec {
         PacketRecordOptVec { packet_records }
+    }
+}
+
+impl JsonMessageVec {
+    pub fn new(json_messages: Vec<String>) -> JsonMessageVec {
+        JsonMessageVec { json_messages }
     }
 }
