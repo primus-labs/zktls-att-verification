@@ -30,7 +30,7 @@ pub struct Attestor {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct AttestationData {
+pub struct PublicData {
     pub recipient: String,
     pub request: RequestData,
     pub reponseResolve: Vec<ResponseResolve>,
@@ -85,7 +85,7 @@ impl ResponseResolve {
     }
 }
 
-impl AttestationData {
+impl PublicData {
     pub fn encode_packed(&self) -> Vec<u8> {
         let mut packed: Vec<u8> = vec![];
         packed.extend(encode_packed_address(&self.recipient));
