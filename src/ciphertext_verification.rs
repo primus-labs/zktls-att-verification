@@ -2,38 +2,6 @@ use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
 use crate::verification_data::{BlockInfo, TLSRecordOpt, VerifyingData, VerifyingDataOpt};
 use anyhow::{anyhow, Result};
 
-impl VerifyingData {
-    // verify full http packet ciphertext
-    pub fn verify_ciphertext(&self) -> Result<()> {
-        for packet in self.packets.iter() {
-            let aes_key = &packet.aes_key;
-            let cipher = Aes128GcmDecryptor::from_hex(aes_key)?;
-
-            if packet.record_messages.len() != packet.records.len() {
-                return Err(anyhow!(
-                    "the length of record_messages and records are not the same"
-                ));
-            }
-
-            let message_record = packet.record_messages.iter().zip(packet.records.iter());
-            for (message, record) in message_record.into_iter() {
-                let nonce = hex::decode(&record.nonce)?;
-
-                let aad = hex::decode(&record.aad)?;
-                let tag = hex::decode(&record.tag)?;
-                let mut ciphertext = hex::decode(&record.ciphertext)?;
-
-                cipher.decrypt(&nonce, &aad, &mut ciphertext, &tag)?;
-                let hex_msg = hex::encode(&ciphertext);
-                if hex_msg != *message {
-                    return Err(anyhow!("check plaintext failed"));
-                }
-            }
-        }
-        Ok(())
-    }
-}
-
 // increase the varying part of nonce
 fn incr_nonce(nonce: &mut [u8; 4]) {
     let mut index: i8 = 3;
@@ -45,6 +13,50 @@ fn incr_nonce(nonce: &mut [u8; 4]) {
             nonce[index as usize] += 1;
             break;
         }
+    }
+}
+
+impl VerifyingData {
+    // verify full http packet ciphertext
+    pub fn verify_ciphertext(&self) -> Result<Vec<String>> {
+        let mut result = vec![];
+        for packet in self.packets.iter() {
+            let aes_key = &packet.aes_key;
+            let cipher = Aes128Encryptor::from_hex(aes_key)?;
+
+            let mut complete_json = String::new();
+            for record in packet.records.iter() {
+                let nonce = hex::decode(&record.nonce)?;
+                let mut ciphertext = hex::decode(&record.ciphertext)?;
+                let ciphertext_len = ciphertext.len();
+
+                let mut nonce_index: [u8; 4] = [0u8; 4];
+                incr_nonce(&mut nonce_index);
+
+                let mut counters = vec![];
+                while counters.len() < ciphertext_len {
+                    incr_nonce(&mut nonce_index);
+                    let mut full_nonce = nonce.clone();
+                    full_nonce.extend(nonce_index);
+                    let full_nonce = cipher.encrypt(&mut full_nonce)?;
+                    counters.extend(full_nonce);
+                }
+
+                counters = counters[..ciphertext_len].to_vec();
+
+                let plaintext = counters.iter().zip(ciphertext.iter()).map(|(c1, c2)| c1 ^ c2).collect::<Vec<u8>>();
+                let plaintext = String::from_utf8(plaintext)?;
+
+                let mut json_payload = String::new();
+                for positions in record.json_block_positions.iter() {
+                    let text: String = plaintext.chars().skip(positions[0] as usize).take((positions[1] - positions[0] + 1) as usize).collect();
+                    json_payload += &text;
+                }
+                complete_json += &json_payload;
+            }
+            result.push(complete_json);
+        }
+        Ok(result)
     }
 }
 

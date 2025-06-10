@@ -13,13 +13,9 @@ use verification_data::{
 
 impl VerifyingData {
     // implement verify interface for VerifyingData
-    pub fn verify(&self, verifying_key: &str) -> Result<()> {
-        // verify ecdsa signature
-        self.verify_signature(verifying_key)?;
-
+    pub fn verify(&self) -> Result<Vec<String>> {
         // verify aes ciphertext
-        self.verify_ciphertext()?;
-        Ok(())
+        self.verify_ciphertext()
     }
 
     // get aes keys
@@ -88,10 +84,7 @@ impl VerifyingData {
 
 impl VerifyingDataOpt {
     // implement verify interface for VerifyingDataOpt
-    pub fn verify(&self, verifying_key: &str) -> Result<()> {
-        // verify ecdsa signature
-        self.verify_signature(verifying_key)?;
-
+    pub fn verify(&self) -> Result<()> {
         // verify aes ciphertext
         self.verify_ciphertext()?;
         Ok(())
