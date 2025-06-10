@@ -6,7 +6,7 @@ impl VerifyingData {
     // verify ecdsa signature for VerifyingData
     // the format of the message to be signed should be:
     // [record0_nonce, record0_ciphertext, record0_tag, ..., recordN_nonce, recordN_ciphertext, recordN_tag]
-    pub fn verify_signature(&self, verifying_key: &str) -> Result<()> {
+    /*pub fn verify_signature(&self, verifying_key: &str) -> Result<()> {
         let verifier = ECDSAVerifier::from_hex(verifying_key)?;
 
         for packet in self.packets.iter() {
@@ -26,14 +26,14 @@ impl VerifyingData {
             verifier.verify(signed_data, ecdsa_signature)?;
         }
         Ok(())
-    }
+    }*/
 }
 
 impl VerifyingDataOpt {
     // verifying ecdsa signature for VerifyingDataOpt
     // the format of the message to be signed should be:
     // [record0_nonce, record0_ciphertext, ..., recordN_nonce, recordN_ciphertext]
-    pub fn verify_signature(&self, verifying_key: &str) -> Result<()> {
+    /*pub fn verify_signature(&self, verifying_key: &str) -> Result<()> {
         let verifier = ECDSAVerifier::from_hex(verifying_key)?;
 
         for packet in self.packets.iter() {
@@ -51,5 +51,5 @@ impl VerifyingDataOpt {
             verifier.verify(signed_data, ecdsa_signature)?;
         }
         Ok(())
-    }
+    }*/
 }

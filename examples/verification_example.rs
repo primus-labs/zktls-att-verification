@@ -18,14 +18,8 @@ fn test_full_aes_verification(verifying_key: &str) -> Result<()> {
         Err(e) => println!("verify failed: {}", e),
     };
 
-    let aes_keys = verifying_data.get_aes_keys();
-    let signatures = verifying_data.get_signatures();
-    let messages = verifying_data.get_messages();
     let records = verifying_data.get_records();
 
-    println!("aes keys: {}", aes_keys);
-    println!("signatures: {}", signatures);
-    println!("messages: {}", messages);
     println!("records: {}", records);
 
     Ok(())
@@ -44,14 +38,8 @@ fn test_partial_aes_verification(verifying_key: &str) -> Result<()> {
         Err(e) => println!("verify failed: {}", e),
     };
 
-    let aes_keys = verifying_data.get_aes_keys();
-    let signatures = verifying_data.get_signatures();
-    let messages = verifying_data.get_messages();
     let records = verifying_data.get_records();
 
-    println!("aes keys: {}", aes_keys);
-    println!("signatures: {}", signatures);
-    println!("messages: {}", messages);
     println!("recrods: {}", records);
 
     Ok(())

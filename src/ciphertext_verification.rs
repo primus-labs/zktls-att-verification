@@ -1,5 +1,5 @@
 use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
-use crate::verification_data::{BlockInfo, TLSRecordOpt, VerifyingData, VerifyingDataOpt};
+use crate::verification_data::{BlockInfo, TLSRecordOpt, VerifyingData, VerifyingDataOpt, JsonData};
 use anyhow::{anyhow, Result};
 
 // increase the varying part of nonce
@@ -18,11 +18,11 @@ fn incr_nonce(nonce: &mut [u8; 4]) {
 
 impl VerifyingData {
     // verify full http packet ciphertext
-    pub fn verify_ciphertext(&self) -> Result<Vec<String>> {
+    pub fn verify_ciphertext(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let mut result = vec![];
+        let cipher = Aes128Encryptor::from_hex(aes_key)?;
+
         for packet in self.packets.iter() {
-            let aes_key = &packet.aes_key;
-            let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
             let mut complete_json = String::new();
             for record in packet.records.iter() {
@@ -54,7 +54,8 @@ impl VerifyingData {
                 }
                 complete_json += &json_payload;
             }
-            result.push(complete_json);
+            let json_data = JsonData::new(&complete_json);
+            result.push(json_data);
         }
         Ok(result)
     }
@@ -104,11 +105,10 @@ fn compute_counter(
 
 impl VerifyingDataOpt {
     // verify partial http packet`
-    pub fn verify_ciphertext(&self) -> Result<()> {
-        for packet in self.packets.iter() {
-            let aes_key = &packet.aes_key;
-            let cipher = Aes128Encryptor::from_hex(aes_key)?;
+    pub fn verify_ciphertext(&self, aes_key: &str) -> Result<()> {
+        let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
+        for packet in self.packets.iter() {
             if packet.record_messages.len() != packet.records.len() {
                 return Err(anyhow!(
                     "the length of record_messages and records are not the same"

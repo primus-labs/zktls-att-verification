@@ -2,13 +2,19 @@ use std::fs;
 use anyhow::Result;
 use hex::FromHex;
 use ethers::types::{H256, Signature};
-use attestation_data::PublicData;
+use attestation_data::AttestationData;
 use zktls_att_verification::attestation_data;
 
 fn main() -> Result<()> {
-    let public_data = fs::read_to_string("data/public_data.json")?;
-    let public_data: PublicData = serde_json::from_str(&public_data)?;
-    public_data.verify()?;
+    let attestation_data = fs::read_to_string("data/attestation_data.json")?;
+    let attestation_data: AttestationData = serde_json::from_str(&attestation_data)?;
+    let messages = attestation_data.verify()?;
+
+    let mut json_paths = vec![];
+    json_paths.push("$.data.spotVol");
+    json_paths.push("$.data.spotNeed");
+    let json_value = messages[0].get_json_values(&json_paths);
+    println!("json value:{:?}", json_value);
 
 
     Ok(())

@@ -8,70 +8,29 @@ pub mod attestation_data;
 use anyhow::Result;
 use verification_data::{
     AesKeyVec, PacketMessageVec, PacketRecordOptVec, PacketRecordVec, SignatureVec, VerifyingData,
-    VerifyingDataOpt, TLSRecord,
+    VerifyingDataOpt, TLSRecord, JsonData,
 };
+use attestation_data::{PublicData, AttestationData};
 
-impl VerifyingData {
-    // implement verify interface for VerifyingData
-    pub fn verify(&self) -> Result<Vec<String>> {
-        // verify aes ciphertext
-        self.verify_ciphertext()
-    }
-
-    // get aes keys
-    pub fn get_aes_keys(&self) -> String {
-        let aes_keys = AesKeyVec::new(self.packets.iter().map(|p| p.aes_key.clone()).collect());
-        serde_json::to_string(&aes_keys).unwrap()
-    }
-
-    // get signatures
-    pub fn get_signatures(&self) -> String {
-        let signatures = SignatureVec::new(
-            self.packets
-                .iter()
-                .map(|p| p.ecdsa_signature.clone())
-                .collect(),
-        );
-        serde_json::to_string(&signatures).unwrap()
-    }
-
-    // get messages
-    pub fn get_messages(&self) -> String {
-        let messages = PacketMessageVec::new(
-            self.packets
-                .iter()
-                .map(|p| p.record_messages.clone())
-                .collect(),
-        );
-
-        serde_json::to_string(&messages).unwrap()
-    }
-
-    // get json value
+impl JsonData {
     pub fn get_json_values(&self, json_paths: &[&str]) -> Vec<String> {
         let mut vec: Vec<String> = vec![];
-        for p in self.packets.iter() {
-            let message_records = p.record_messages.iter().zip(p.records.iter()).collect::<Vec<(&String, &TLSRecord)>>();
-            let mut json_msg = String::new();
-            for (message, record) in message_records.into_iter() {
-                let m = hex::decode(&message).unwrap();
-                let s = String::from_utf8_lossy(&m);
-                for positions in record.json_block_positions.iter() {
-                    let substr = s.chars().skip(positions[0] as usize).take((positions[1] - positions[0] + 1) as usize).collect::<String>();
-                    json_msg += &substr;
-                }
-            }
-
-            let json_values = serde_json::from_str(&json_msg).unwrap();
-            for json_path in json_paths.iter() {
-                let results = jsonpath_lib::select(&json_values, json_path).unwrap();
-                for result in results.iter() {
-                    let result = result.as_str().unwrap();
-                    vec.push(result.to_string());
-                }
+        for json_path in json_paths.iter() {
+            let results = jsonpath_lib::select(&self.msg, json_path).unwrap();
+            for result in results.iter() {
+                let result = result.as_str().unwrap();
+                vec.push(result.to_string());
             }
         }
         vec
+    }
+}
+
+impl VerifyingData {
+    // implement verify interface for VerifyingData
+    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+        // verify aes ciphertext
+        self.verify_ciphertext(aes_key)
     }
 
     // get records
@@ -84,41 +43,10 @@ impl VerifyingData {
 
 impl VerifyingDataOpt {
     // implement verify interface for VerifyingDataOpt
-    pub fn verify(&self) -> Result<()> {
+    pub fn verify(&self, aes_key: &str) -> Result<()> {
         // verify aes ciphertext
-        self.verify_ciphertext()?;
+        self.verify_ciphertext(aes_key)?;
         Ok(())
-    }
-
-    // get aes keys
-    pub fn get_aes_keys(&self) -> String {
-        let aes_keys = AesKeyVec::new(self.packets.iter().map(|p| p.aes_key.clone()).collect());
-
-        serde_json::to_string(&aes_keys).unwrap()
-    }
-    
-    // get signatures
-    pub fn get_signatures(&self) -> String {
-        let signatures = SignatureVec::new(
-            self.packets
-                .iter()
-                .map(|p| p.ecdsa_signature.clone())
-                .collect(),
-        );
-
-        serde_json::to_string(&signatures).unwrap()
-    }
-
-    // get messages
-    pub fn get_messages(&self) -> String {
-        let messages = PacketMessageVec::new(
-            self.packets
-                .iter()
-                .map(|p| p.record_messages.clone())
-                .collect(),
-        );
-
-        serde_json::to_string(&messages).unwrap()
     }
 
     // get records
@@ -129,3 +57,25 @@ impl VerifyingDataOpt {
         serde_json::to_string(&records).unwrap()
     }
 }
+
+impl PublicData {
+    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+        self.verify_signature()?;
+
+        println!("data: {}", self.data);
+        let json_value: serde_json::Value = serde_json::from_str(&self.data).unwrap();
+        let data = &json_value["CompleteHttpResponseCiphertext"];
+            println!("d:{}", data.as_str().unwrap());
+        let data = data.as_str().unwrap();
+        let verifying_data: VerifyingData = serde_json::from_str(&data).unwrap();
+        println!("{:?}", verifying_data);
+        verifying_data.verify(aes_key)
+    }
+}
+
+impl AttestationData {
+    pub fn verify(&self) -> Result<Vec<JsonData>> {
+        self.public_data.verify(&self.private_data.aes_key)
+    }
+}
+

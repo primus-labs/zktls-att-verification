@@ -5,19 +5,19 @@ use serde::{Deserialize, Serialize};
 pub struct TLSRecord {
     pub ciphertext: String,          // tls record ciphertext
     pub nonce: String,               // tls record nonce
-    pub aad: String,                 // tls associated data
-    pub tag: String,                 // tls record tag
-    pub blocks_to_redact: Vec<u32>,  // blocks to redact
-    pub blocks_to_extract: Vec<u32>, // blocks to extract
+    // pub aad: String,                 // tls associated data
+    // pub tag: String,                 // tls record tag
+    // pub blocks_to_redact: Vec<u32>,  // blocks to redact
+    // pub blocks_to_extract: Vec<u32>, // blocks to extract
     pub json_block_positions: Vec<Vec<u32>>,    // positions to find json block
 }
 
 // HTTP Packet
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacket {
-    pub aes_key: String,         // aes key for encrypting/decrypting
-    pub record_messages: Vec<String>, // plaintext in one packet
-    pub ecdsa_signature: String, // ecdsa signature
+    // pub aes_key: String,         // aes key for encrypting/decrypting
+    // pub record_messages: Vec<String>, // plaintext in one packet
+    // pub ecdsa_signature: String, // ecdsa signature
     pub records: Vec<TLSRecord>, // TLS Records, constructing full http packet
 }
 
@@ -55,6 +55,11 @@ pub struct HTTPPacketOpt {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VerifyingDataOpt {
     pub packets: Vec<HTTPPacketOpt>, // partial HTTP Packet
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JsonData {
+    pub msg: serde_json::Value,
 }
 
 // AES key wrapper
@@ -130,5 +135,12 @@ impl PacketRecordOptVec {
 impl JsonMessageVec {
     pub fn new(json_messages: Vec<String>) -> JsonMessageVec {
         JsonMessageVec { json_messages }
+    }
+}
+
+impl JsonData {
+    pub fn new(msg: &str) -> JsonData {
+        let msg: serde_json::Value = serde_json::from_str(msg).unwrap();
+        JsonData { msg }
     }
 }
