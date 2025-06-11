@@ -13,7 +13,7 @@ serde_json = "1.0"
 hex= "0.4"
 anyhow = "1.0"
 jsonpath_lib = "0.3"
-tiny-keccak = {version = "2.0", features=["sha3"]}
+tiny-keccak = {version = "2.0", features=["sha3", "keccak"]}
 secp256k1 = {git = "https://github.com/brevis-network/rust-secp256k1.git", branch = "patch-v1.0.1", features=["recovery", "global-context"]}
 
 k256 = "0.13.3"
