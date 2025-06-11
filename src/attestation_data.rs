@@ -15,18 +15,23 @@ pub struct RequestData {
     pub method: String,
     pub body: String,
 }
+
+#[allow(non_snake_case)]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ResponseResolve {
     pub keyName: String,
     pub parseType: String,
     pub parsePath: String,
 }
+
+#[allow(non_snake_case)]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Attestor {
     pub attestorAddr: String,
     pub url: String,
 }
 
+#[allow(non_snake_case)]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PublicData {
     pub recipient: String,
@@ -136,10 +141,10 @@ impl PublicData {
         println!("address: {}", hex::encode(&address));
 
         let index = self.attestors.iter().find(|attestor| {
-            let attestorAddr = &attestor.attestorAddr;
-            let attestorAddr = attestorAddr.strip_prefix("0x").unwrap_or(attestorAddr);
-            let attestorAddr = hex::decode(&attestorAddr).unwrap(); 
-            attestorAddr == address
+            let attestor_addr = &attestor.attestorAddr;
+            let attestor_addr = attestor_addr.strip_prefix("0x").unwrap_or(attestor_addr);
+            let attestor_addr = hex::decode(&attestor_addr).unwrap(); 
+            attestor_addr == address
         });
         if let Some(_) = index {
             return Ok(());
