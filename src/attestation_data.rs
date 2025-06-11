@@ -1,7 +1,5 @@
 use anyhow::{anyhow, Result};
-use ethers::abi::Token;
-use ethers::abi::encode;
-use ethers::types::{H256, U64, Address};
+use ethers::types::{H256};
 use ethers::core::types::Signature;
 use ethers::utils::keccak256;
 use std::io::Write;
@@ -50,17 +48,17 @@ pub struct AttestationData {
 }
 
 fn encode_packed_u64(n: u64) -> Vec<u8> {
-    let mut num_bytes = [0u8; 8];
-    U64::from(n).to_big_endian(&mut num_bytes);
-    // let trimmed = num_bytes.iter().skip_while(|b| **b == 0).cloned().collect::<Vec<u8>>();
-    num_bytes.to_vec()
+    let mut bytes: Vec<u8> = vec![];
+    for i in 0..8 {
+        bytes.push((n >> (7 - i) * 8) as u8);
+    }
+    bytes
 }
 
 fn encode_packed_address(addr: &str) -> Vec<u8> {
     let addr = addr.strip_prefix("0x").unwrap_or(addr);
     let addr_bytes: [u8; 20] = <[u8; 20]>::from_hex(addr).unwrap();
-    let addr = Address::from(addr_bytes);
-    addr.as_bytes().to_vec()
+    addr_bytes.to_vec()
 }
 
 impl RequestData {

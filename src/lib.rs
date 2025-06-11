@@ -62,13 +62,10 @@ impl PublicData {
     pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         self.verify_signature()?;
 
-        println!("data: {}", self.data);
         let json_value: serde_json::Value = serde_json::from_str(&self.data).unwrap();
         let data = &json_value["CompleteHttpResponseCiphertext"];
-            println!("d:{}", data.as_str().unwrap());
         let data = data.as_str().unwrap();
         let verifying_data: VerifyingData = serde_json::from_str(&data).unwrap();
-        println!("{:?}", verifying_data);
         verifying_data.verify(aes_key)
     }
 }
