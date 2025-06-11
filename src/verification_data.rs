@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 // TLS Record
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TLSRecord {
-    pub ciphertext: String,          // tls record ciphertext
-    pub nonce: String,               // tls record nonce
-    pub json_block_positions: Vec<Vec<u32>>,    // positions to find json block
+    pub ciphertext: String,                  // tls record ciphertext
+    pub nonce: String,                       // tls record nonce
+    pub json_block_positions: Vec<Vec<u32>>, // positions to find json block
 }
 
 // HTTP Packet
@@ -49,7 +49,7 @@ pub struct TLSRecordOpt {
 // HTTP packet data
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacketOpt {
-    pub records: Vec<TLSRecordOpt>,   // TLS Records, construct partial http packet
+    pub records: Vec<TLSRecordOpt>, // TLS Records, construct partial http packet
 }
 
 // Data to verify for partial prove

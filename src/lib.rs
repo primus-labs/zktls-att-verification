@@ -1,16 +1,16 @@
 pub mod aes_utils;
+pub mod attestation_data;
 pub mod ciphertext_verification;
 pub mod ecdsa_utils;
 pub mod signature_verification;
 pub mod verification_data;
-pub mod attestation_data;
 
 use anyhow::Result;
+use attestation_data::{AttestationData, PublicData};
 use verification_data::{
-    AesKeyVec, PacketMessageVec, PacketRecordOptVec, PacketRecordVec, SignatureVec, VerifyingData,
-    VerifyingDataOpt, TLSRecord, JsonData,
+    AesKeyVec, JsonData, PacketMessageVec, PacketRecordOptVec, PacketRecordVec, SignatureVec,
+    TLSRecord, VerifyingData, VerifyingDataOpt,
 };
-use attestation_data::{PublicData, AttestationData};
 
 impl JsonData {
     pub fn get_json_values(&self, json_paths: &[&str]) -> Vec<String> {
@@ -67,8 +67,8 @@ impl PublicData {
         let data = data.as_str().unwrap();
         let verifying_data: VerifyingData = serde_json::from_str(&data).unwrap();
         let json_data_vec = verifying_data.verify(aes_key)?;
-		let records = verifying_data.get_records();
-		Ok((json_data_vec, records))
+        let records = verifying_data.get_records();
+        Ok((json_data_vec, records))
     }
 }
 
@@ -77,4 +77,3 @@ impl AttestationData {
         self.public_data.verify(&self.private_data.aes_key)
     }
 }
-

@@ -1,7 +1,7 @@
-use std::fs;
 use anyhow::Result;
-use hex::FromHex;
 use attestation_data::AttestationData;
+use hex::FromHex;
+use std::fs;
 use zktls_att_verification::attestation_data;
 
 fn main() -> Result<()> {
@@ -14,7 +14,7 @@ fn main() -> Result<()> {
     json_paths.push("$.data.spotNeed");
     let json_value = messages[0].get_json_values(&json_paths);
     println!("json value:{:?}", json_value);
-	println!("records: {}", records);
+    println!("records: {}", records);
 
     Ok(())
 }

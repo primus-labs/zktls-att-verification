@@ -1,5 +1,7 @@
 use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
-use crate::verification_data::{BlockInfo, TLSRecordOpt, VerifyingData, VerifyingDataOpt, JsonData};
+use crate::verification_data::{
+    BlockInfo, JsonData, TLSRecordOpt, VerifyingData, VerifyingDataOpt,
+};
 use anyhow::{anyhow, Result};
 
 // increase the varying part of nonce
@@ -23,7 +25,6 @@ impl VerifyingData {
         let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
         for packet in self.packets.iter() {
-
             let mut complete_json = String::new();
             for record in packet.records.iter() {
                 let nonce = hex::decode(&record.nonce)?;
@@ -44,12 +45,20 @@ impl VerifyingData {
 
                 counters = counters[..ciphertext_len].to_vec();
 
-                let plaintext = counters.iter().zip(ciphertext.iter()).map(|(c1, c2)| c1 ^ c2).collect::<Vec<u8>>();
+                let plaintext = counters
+                    .iter()
+                    .zip(ciphertext.iter())
+                    .map(|(c1, c2)| c1 ^ c2)
+                    .collect::<Vec<u8>>();
                 let plaintext = String::from_utf8(plaintext)?;
 
                 let mut json_payload = String::new();
                 for positions in record.json_block_positions.iter() {
-                    let text: String = plaintext.chars().skip(positions[0] as usize).take((positions[1] - positions[0] + 1) as usize).collect();
+                    let text: String = plaintext
+                        .chars()
+                        .skip(positions[0] as usize)
+                        .take((positions[1] - positions[0] + 1) as usize)
+                        .collect();
                     json_payload += &text;
                 }
                 complete_json += &json_payload;

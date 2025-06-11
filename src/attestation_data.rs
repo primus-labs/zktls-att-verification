@@ -1,12 +1,12 @@
+use crate::verification_data::{PrivateData, VerifyingData};
 use anyhow::{anyhow, Result};
-use secp256k1::{ecdsa, Message, PublicKey, Secp256k1, Verification};
-use tiny_keccak::{Keccak, Hasher};
-use std::io::Write;
-use serde::{Serialize, Deserialize};
-use std::fs;
 use hex::FromHex;
+use secp256k1::{ecdsa, Message, PublicKey, Secp256k1, Verification};
+use serde::{Deserialize, Serialize};
+use std::fs;
+use std::io::Write;
 use std::str::FromStr;
-use crate::verification_data::{VerifyingData, PrivateData};
+use tiny_keccak::{Hasher, Keccak};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RequestData {
@@ -143,7 +143,7 @@ impl PublicData {
         let index = self.attestors.iter().find(|attestor| {
             let attestor_addr = &attestor.attestorAddr;
             let attestor_addr = attestor_addr.strip_prefix("0x").unwrap_or(attestor_addr);
-            let attestor_addr = hex::decode(&attestor_addr).unwrap(); 
+            let attestor_addr = hex::decode(&attestor_addr).unwrap();
             attestor_addr == address
         });
         if let Some(_) = index {
@@ -152,4 +152,3 @@ impl PublicData {
         Err(anyhow!("fail to verify signature"))
     }
 }
-
