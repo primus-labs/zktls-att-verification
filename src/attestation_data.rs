@@ -1,7 +1,6 @@
 use anyhow::{anyhow, Result};
-use ethers::types::{H256};
-use ethers::core::types::Signature;
-use ethers::utils::keccak256;
+use secp256k1::{ecdsa, Message, PublicKey, Secp256k1, Verification};
+use tiny_keccak::{Keccak, Hasher};
 use std::io::Write;
 use serde::{Serialize, Deserialize};
 use std::fs;
@@ -61,6 +60,20 @@ fn encode_packed_address(addr: &str) -> Vec<u8> {
     addr_bytes.to_vec()
 }
 
+fn keccak256(data: &[u8]) -> [u8; 32] {
+    let mut hasher = Keccak::v256();
+    let mut output = [0u8; 32];
+    hasher.update(data);
+    hasher.finalize(&mut output);
+    output
+}
+
+fn public_key_to_address(public_key: &PublicKey) -> Result<Vec<u8>> {
+    let public_key_bytes = public_key.serialize_uncompressed();
+    let public_key_hash = keccak256(&public_key_bytes[1..]);
+    let address = &public_key_hash[12..];
+    Ok(address.to_vec())
+}
 impl RequestData {
     pub fn encode_packed(&self) -> Vec<u8> {
         let mut packed: Vec<u8> = vec![];
@@ -110,22 +123,28 @@ impl PublicData {
     }
 
     pub fn verify_signature(&self) -> Result<()> {
-        let hash = H256::from_slice(&self.hash());
-    
+        let secp = Secp256k1::new();
+        let hash = Message::from_digest_slice(&self.hash())?;
         let sig_hex = &self.signatures[0];
         let sig_hex = sig_hex.strip_prefix("0x").unwrap_or(sig_hex);
         let sig_bytes = <[u8; 65]>::from_hex(sig_hex).unwrap();
-        let signature = Signature::try_from(&sig_bytes[..]).unwrap();
-        let addr = signature.recover(hash).unwrap().to_string();
-        println!("addr: {:?}", addr);
-        println!("attestor: {:?}", self.attestors);
+        let v = i32::from((sig_bytes[64] - 27) % 4);
+        let recovery_id = ecdsa::RecoveryId::from_i32(v)?;
+        let sig = ecdsa::RecoverableSignature::from_compact(&sig_bytes[..64], recovery_id)?;
+        let public_key = secp.recover_ecdsa(&hash, &sig)?;
+        let address = public_key_to_address(&public_key)?;
+        println!("address: {}", hex::encode(&address));
 
-        let index = self.attestors.iter().find(|attestor| attestor.attestorAddr == addr);
+        let index = self.attestors.iter().find(|attestor| {
+            let attestorAddr = &attestor.attestorAddr;
+            let attestorAddr = attestorAddr.strip_prefix("0x").unwrap_or(attestorAddr);
+            let attestorAddr = hex::decode(&attestorAddr).unwrap(); 
+            attestorAddr == address
+        });
         if let Some(_) = index {
             return Ok(());
         }
-        // Err(anyhow!("fail to verify signature"))
-        Ok(())
+        Err(anyhow!("fail to verify signature"))
     }
 }
 
