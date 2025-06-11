@@ -59,19 +59,21 @@ impl VerifyingDataOpt {
 }
 
 impl PublicData {
-    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+    pub fn verify(&self, aes_key: &str) -> Result<(Vec<JsonData>, String)> {
         self.verify_signature()?;
 
         let json_value: serde_json::Value = serde_json::from_str(&self.data).unwrap();
         let data = &json_value["CompleteHttpResponseCiphertext"];
         let data = data.as_str().unwrap();
         let verifying_data: VerifyingData = serde_json::from_str(&data).unwrap();
-        verifying_data.verify(aes_key)
+        let json_data_vec = verifying_data.verify(aes_key)?;
+		let records = verifying_data.get_records();
+		Ok((json_data_vec, records))
     }
 }
 
 impl AttestationData {
-    pub fn verify(&self) -> Result<Vec<JsonData>> {
+    pub fn verify(&self) -> Result<(Vec<JsonData>, String)> {
         self.public_data.verify(&self.private_data.aes_key)
     }
 }
