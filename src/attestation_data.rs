@@ -9,7 +9,7 @@ use serde::{Serialize, Deserialize};
 use std::fs;
 use hex::FromHex;
 use std::str::FromStr;
-use crate::verification_data::VerifyingData;
+use crate::verification_data::{VerifyingData, PrivateData};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RequestData {
@@ -41,11 +41,6 @@ pub struct PublicData {
     pub additionParams: String,
     pub attestors: Vec<Attestor>,
     pub signatures: Vec<String>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PrivateData {
-    pub aes_key: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

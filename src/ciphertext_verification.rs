@@ -105,22 +105,13 @@ fn compute_counter(
 
 impl VerifyingDataOpt {
     // verify partial http packet`
-    pub fn verify_ciphertext(&self, aes_key: &str) -> Result<()> {
+    pub fn verify_ciphertext(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+        let mut result = vec![];
         let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
         for packet in self.packets.iter() {
-            if packet.record_messages.len() != packet.records.len() {
-                return Err(anyhow!(
-                    "the length of record_messages and records are not the same"
-                ));
-            }
-
-            let message_record: Vec<(&String, &TLSRecordOpt)> = packet
-                .record_messages
-                .iter()
-                .zip(packet.records.iter())
-                .collect();
-            for (record_msg, record) in message_record.into_iter() {
+            let mut complete_json = String::new();
+            for record in packet.records.iter() {
                 let nonce = hex::decode(&record.nonce)?;
                 let ciphertext = hex::decode(&record.ciphertext)?;
 
@@ -132,12 +123,12 @@ impl VerifyingDataOpt {
                     .zip(ciphertext.iter())
                     .map(|(a, b)| a ^ b)
                     .collect();
-                let hex_msg = hex::encode(&decrypted_msg);
-                if *record_msg != hex_msg {
-                    return Err(anyhow!("check plaintext failed"));
-                }
+                let text = String::from_utf8(decrypted_msg)?;
+                complete_json += &text;
             }
+            let json_data = JsonData::new(&complete_json);
+            result.push(json_data);
         }
-        Ok(())
+        Ok(result)
     }
 }

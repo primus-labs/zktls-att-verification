@@ -1,24 +1,24 @@
 use anyhow::Result;
 use std::fs;
-use verification_data::{VerifyingData, VerifyingDataOpt};
+use verification_data::{FullData, PartialData};
 use zktls_att_verification::verification_data;
 
 // verify ecdsa signature and aes ciphertext for full http response
-fn test_full_aes_verification(verifying_key: &str) -> Result<()> {
+fn test_full_aes_verification() -> Result<()> {
     // load full http response
     let json_content = fs::read_to_string("./data/full_http_responses.json")?;
     println!("jsonContent: {}", json_content);
 
-    let verifying_data: VerifyingData = serde_json::from_str(&json_content)?;
+    let full_data: FullData = serde_json::from_str(&json_content)?;
     // verify full http response
-    match verifying_data.verify() {
+    match full_data.verifying_data.verify(&full_data.private_data.aes_key) {
         Ok(vec) => {
             println!("verify passed: {:?}", vec);
         }
         Err(e) => println!("verify failed: {}", e),
     };
 
-    let records = verifying_data.get_records();
+    let records = full_data.verifying_data.get_records();
 
     println!("records: {}", records);
 
@@ -26,19 +26,19 @@ fn test_full_aes_verification(verifying_key: &str) -> Result<()> {
 }
 
 // verify ecdsa signature and aes ciphertext for partial http response
-fn test_partial_aes_verification(verifying_key: &str) -> Result<()> {
+fn test_partial_aes_verification() -> Result<()> {
     // load partial http response
     let json_content = fs::read_to_string("./data/partial_http_responses.json")?;
     println!("jsonContent: {}", json_content);
 
-    let verifying_data: VerifyingDataOpt = serde_json::from_str(&json_content)?;
+    let partial_data: PartialData = serde_json::from_str(&json_content)?;
     // verify parital http response
-    match verifying_data.verify() {
+    match partial_data.verifying_data.verify(&partial_data.private_data.aes_key) {
         Ok(()) => println!("verify passed"),
         Err(e) => println!("verify failed: {}", e),
     };
 
-    let records = verifying_data.get_records();
+    let records = partial_data.verifying_data.get_records();
 
     println!("recrods: {}", records);
 
@@ -46,14 +46,11 @@ fn test_partial_aes_verification(verifying_key: &str) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    // load verifying key
-    let public_key = fs::read_to_string("keys/verifying_k256.key")?;
-
     // verify full http response
-    test_full_aes_verification(&public_key)?;
+    test_full_aes_verification()?;
 
     // verify partial http response
-    test_partial_aes_verification(&public_key)?;
+    test_partial_aes_verification()?;
 
     Ok(())
 }

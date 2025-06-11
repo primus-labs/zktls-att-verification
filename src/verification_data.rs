@@ -5,19 +5,12 @@ use serde::{Deserialize, Serialize};
 pub struct TLSRecord {
     pub ciphertext: String,          // tls record ciphertext
     pub nonce: String,               // tls record nonce
-    // pub aad: String,                 // tls associated data
-    // pub tag: String,                 // tls record tag
-    // pub blocks_to_redact: Vec<u32>,  // blocks to redact
-    // pub blocks_to_extract: Vec<u32>, // blocks to extract
     pub json_block_positions: Vec<Vec<u32>>,    // positions to find json block
 }
 
 // HTTP Packet
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacket {
-    // pub aes_key: String,         // aes key for encrypting/decrypting
-    // pub record_messages: Vec<String>, // plaintext in one packet
-    // pub ecdsa_signature: String, // ecdsa signature
     pub records: Vec<TLSRecord>, // TLS Records, constructing full http packet
 }
 
@@ -25,6 +18,17 @@ pub struct HTTPPacket {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VerifyingData {
     pub packets: Vec<HTTPPacket>, // HTTP Packet
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PrivateData {
+    pub aes_key: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FullData {
+    pub verifying_data: VerifyingData,
+    pub private_data: PrivateData,
 }
 
 // AES Counter block info
@@ -45,9 +49,6 @@ pub struct TLSRecordOpt {
 // HTTP packet data
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HTTPPacketOpt {
-    pub aes_key: String,              // aes key for decrypting http packet
-    pub record_messages: Vec<String>, // plaintext in one packet
-    pub ecdsa_signature: String,      // ecdsa signature
     pub records: Vec<TLSRecordOpt>,   // TLS Records, construct partial http packet
 }
 
@@ -55,6 +56,12 @@ pub struct HTTPPacketOpt {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VerifyingDataOpt {
     pub packets: Vec<HTTPPacketOpt>, // partial HTTP Packet
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PartialData {
+    pub verifying_data: VerifyingDataOpt,
+    pub private_data: PrivateData,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
