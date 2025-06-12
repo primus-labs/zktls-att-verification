@@ -51,6 +51,12 @@ pub struct AttestationData {
     pub private_data: PrivateData,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct AttestationConfig {
+    pub attestor_addr: String,
+    pub url: Vec<String>,
+}
+
 fn encode_packed_u64(n: u64) -> Vec<u8> {
     let mut bytes: Vec<u8> = vec![];
     for i in 0..8 {
@@ -127,7 +133,7 @@ impl PublicData {
         keccak256(&self.encode_packed()).to_vec()
     }
 
-    pub fn verify_signature(&self) -> Result<()> {
+    pub fn verify_signature(&self, signer_addr: &str) -> Result<()> {
         let secp = Secp256k1::new();
         let hash = Message::from_digest_slice(&self.hash())?;
         let sig_hex = &self.signatures[0];
@@ -139,16 +145,22 @@ impl PublicData {
         let public_key = secp.recover_ecdsa(&hash, &sig)?;
         let address = public_key_to_address(&public_key)?;
         println!("address: {}", hex::encode(&address));
-
-        let index = self.attestors.iter().find(|attestor| {
-            let attestor_addr = &attestor.attestorAddr;
-            let attestor_addr = attestor_addr.strip_prefix("0x").unwrap_or(attestor_addr);
-            let attestor_addr = hex::decode(&attestor_addr).unwrap();
-            attestor_addr == address
-        });
-        if let Some(_) = index {
+        
+        let signer_addr = signer_addr.strip_prefix("0x").unwrap_or(signer_addr);
+        let signer_addr = hex::decode(&signer_addr)?;
+        if signer_addr == address {
             return Ok(());
         }
+
         Err(anyhow!("fail to verify signature"))
+    }
+
+    pub fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
+        for url in allowed_urls.iter() {
+            if url == &self.request.url {
+                return Ok(());
+            }
+        }
+        Err(anyhow!("fail to check url"))
     }
 }
