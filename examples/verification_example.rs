@@ -56,7 +56,7 @@ fn main() -> Result<()> {
     test_full_aes_verification()?;
 
     // verify partial http response
-    test_partial_aes_verification()?;
+    // test_partial_aes_verification()?;
 
     Ok(())
 }

@@ -1,8 +1,8 @@
-use crate::aes_utils::{Aes128Encryptor, Aes128GcmDecryptor};
+use crate::aes_utils::{Aes128Encryptor};
 use crate::verification_data::{
-    BlockInfo, JsonData, TLSRecordOpt, VerifyingData, VerifyingDataOpt,
+    BlockInfo, JsonData, VerifyingData, VerifyingDataOpt,
 };
-use anyhow::{anyhow, Result};
+use anyhow::{Result};
 
 // increase the varying part of nonce
 fn incr_nonce(nonce: &mut [u8; 4]) {
@@ -28,7 +28,7 @@ impl VerifyingData {
             let mut complete_json = String::new();
             for record in packet.records.iter() {
                 let nonce = hex::decode(&record.nonce)?;
-                let mut ciphertext = hex::decode(&record.ciphertext)?;
+                let ciphertext = hex::decode(&record.ciphertext)?;
                 let ciphertext_len = ciphertext.len();
 
                 let mut nonce_index: [u8; 4] = [0u8; 4];

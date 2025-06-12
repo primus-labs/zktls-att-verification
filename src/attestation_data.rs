@@ -1,11 +1,8 @@
-use crate::verification_data::{PrivateData, VerifyingData};
+use crate::verification_data::{PrivateData, VerifyingData, JsonData};
 use anyhow::{anyhow, Result};
 use hex::FromHex;
-use secp256k1::{ecdsa, Message, PublicKey, Secp256k1, Verification};
+use secp256k1::{ecdsa, Message, PublicKey, Secp256k1};
 use serde::{Deserialize, Serialize};
-use std::fs;
-use std::io::Write;
-use std::str::FromStr;
 use tiny_keccak::{Hasher, Keccak};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -85,8 +82,9 @@ fn public_key_to_address(public_key: &PublicKey) -> Result<Vec<u8>> {
     let address = &public_key_hash[12..];
     Ok(address.to_vec())
 }
+
 impl RequestData {
-    pub fn encode_packed(&self) -> Vec<u8> {
+    fn encode_packed(&self) -> Vec<u8> {
         let mut packed: Vec<u8> = vec![];
         packed.extend(self.url.as_bytes());
         packed.extend(self.header.as_bytes());
@@ -101,7 +99,7 @@ impl RequestData {
 }
 
 impl ResponseResolve {
-    pub fn encode_packed(&self) -> Vec<u8> {
+    fn encode_packed(&self) -> Vec<u8> {
         let mut packed: Vec<u8> = vec![];
         packed.extend(self.keyName.as_bytes());
         packed.extend(self.parseType.as_bytes());
@@ -115,7 +113,7 @@ impl ResponseResolve {
 }
 
 impl PublicData {
-    pub fn encode_packed(&self) -> Vec<u8> {
+    fn encode_packed(&self) -> Vec<u8> {
         let mut packed: Vec<u8> = vec![];
         packed.extend(encode_packed_address(&self.recipient));
         packed.extend(self.request.hash());
@@ -133,7 +131,7 @@ impl PublicData {
         keccak256(&self.encode_packed()).to_vec()
     }
 
-    pub fn verify_signature(&self, signer_addr: &str) -> Result<()> {
+    fn verify_signature(&self, signer_addr: &str) -> Result<()> {
         let secp = Secp256k1::new();
         let hash = Message::from_digest_slice(&self.hash())?;
         let sig_hex = &self.signatures[0];
@@ -155,12 +153,29 @@ impl PublicData {
         Err(anyhow!("fail to verify signature"))
     }
 
-    pub fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
+    fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
         for url in allowed_urls.iter() {
             if url == &self.request.url {
                 return Ok(());
             }
         }
         Err(anyhow!("fail to check url"))
+    }
+
+    pub fn verify(&self, config: &AttestationConfig, aes_key: &str) -> Result<Vec<JsonData>> {
+        self.verify_signature(&config.attestor_addr)?;
+        self.verify_url(&config.url)?;
+
+        let json_value: serde_json::Value = serde_json::from_str(&self.data).unwrap();
+        let data = &json_value["CompleteHttpResponseCiphertext"];
+        let data = data.as_str().unwrap();
+        let verifying_data: VerifyingData = serde_json::from_str(&data).unwrap();
+        let json_data_vec = verifying_data.verify(aes_key)?;
+        Ok(json_data_vec)
+    }
+}
+impl AttestationData {
+    pub fn verify(&self, config: &AttestationConfig) -> Result<Vec<JsonData>> {
+        self.public_data.verify(config, &self.private_data.aes_key)
     }
 }

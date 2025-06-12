@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use anyhow::Result;
 
 // TLS Record
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -69,29 +70,6 @@ pub struct JsonData {
     pub msg: serde_json::Value,
 }
 
-// AES key wrapper
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AesKeyVec {
-    pub aes_keys: Vec<String>,
-}
-
-// plaintext wrapper
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PacketMessageVec {
-    pub packet_messages: Vec<Vec<String>>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct JsonMessageVec {
-    pub json_messages: Vec<String>,
-}
-
-// signature wrapper
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SignatureVec {
-    pub signatures: Vec<String>,
-}
-
 // tls record wrapper for partial prove
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PacketRecordOptVec {
@@ -102,27 +80,6 @@ pub struct PacketRecordOptVec {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PacketRecordVec {
     pub packet_records: Vec<Vec<TLSRecord>>,
-}
-
-impl AesKeyVec {
-    // AesKeyVec constructor
-    pub fn new(aes_keys: Vec<String>) -> AesKeyVec {
-        AesKeyVec { aes_keys }
-    }
-}
-
-impl SignatureVec {
-    // SignatureVec constructor
-    pub fn new(signatures: Vec<String>) -> SignatureVec {
-        SignatureVec { signatures }
-    }
-}
-
-impl PacketMessageVec {
-    // PacketMessageVec constructor
-    pub fn new(packet_messages: Vec<Vec<String>>) -> PacketMessageVec {
-        PacketMessageVec { packet_messages }
-    }
 }
 
 impl PacketRecordVec {
@@ -139,15 +96,54 @@ impl PacketRecordOptVec {
     }
 }
 
-impl JsonMessageVec {
-    pub fn new(json_messages: Vec<String>) -> JsonMessageVec {
-        JsonMessageVec { json_messages }
-    }
-}
-
 impl JsonData {
     pub fn new(msg: &str) -> JsonData {
         let msg: serde_json::Value = serde_json::from_str(msg).unwrap();
         JsonData { msg }
     }
+
+    pub fn get_json_values(&self, json_paths: &[&str]) -> Vec<String> {
+        let mut vec: Vec<String> = vec![];
+        for json_path in json_paths.iter() {
+            let results = jsonpath_lib::select(&self.msg, json_path).unwrap();
+            for result in results.iter() {
+                let result = result.as_str().unwrap();
+                vec.push(result.to_string());
+            }
+        }
+        vec
+    }
 }
+
+impl VerifyingData {
+    // implement verify interface for VerifyingData
+    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+        // verify aes ciphertext
+        self.verify_ciphertext(aes_key)
+    }
+
+    // get records
+    pub fn get_records(&self) -> String {
+        let records =
+            PacketRecordVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
+        serde_json::to_string(&records).unwrap()
+    }
+}
+
+impl VerifyingDataOpt {
+    // implement verify interface for VerifyingDataOpt
+    pub fn verify(&self, aes_key: &str) -> Result<()> {
+        // verify aes ciphertext
+        self.verify_ciphertext(aes_key)?;
+        Ok(())
+    }
+
+    // get records
+    pub fn get_records(&self) -> String {
+        let records =
+            PacketRecordOptVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
+
+        serde_json::to_string(&records).unwrap()
+    }
+}
+
