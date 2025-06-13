@@ -1,5 +1,30 @@
 use serde::{Deserialize, Serialize};
 use anyhow::Result;
+use crate::aes_utils::{BlockInfo, Aes128Encryptor};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JsonData {
+    pub msg: serde_json::Value,
+}
+
+impl JsonData {
+    pub fn new(msg: &str) -> JsonData {
+        let msg: serde_json::Value = serde_json::from_str(msg).unwrap();
+        JsonData { msg }
+    }
+
+    pub fn get_json_values(&self, json_paths: &[&str]) -> Vec<String> {
+        let mut vec: Vec<String> = vec![];
+        for json_path in json_paths.iter() {
+            let results = jsonpath_lib::select(&self.msg, json_path).unwrap();
+            for result in results.iter() {
+                let result = result.as_str().unwrap();
+                vec.push(result.to_string());
+            }
+        }
+        vec
+    }
+}
 
 // TLS Record
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -21,6 +46,45 @@ pub struct VerifyingData {
     pub packets: Vec<HTTPPacket>, // HTTP Packet
 }
 
+impl VerifyingData {
+    // implement verify interface for VerifyingData
+    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+        let mut result = vec![];
+        let cipher = Aes128Encryptor::from_hex(aes_key)?;
+
+        for packet in self.packets.iter() {
+            let mut complete_json = String::new();
+            for record in packet.records.iter() {
+                let nonce = hex::decode(&record.nonce)?;
+                let ciphertext = hex::decode(&record.ciphertext)?;
+                let ciphertext_len = ciphertext.len();
+
+                let counters = cipher.compute_continuous_counters(&nonce, ciphertext_len)?;
+                let plaintext = counters
+                    .iter()
+                    .zip(ciphertext.iter())
+                    .map(|(c1, c2)| c1 ^ c2)
+                    .collect::<Vec<u8>>();
+                let plaintext = String::from_utf8(plaintext)?;
+
+                let mut json_payload = String::new();
+                for positions in record.json_block_positions.iter() {
+                    let text: String = plaintext
+                        .chars()
+                        .skip(positions[0] as usize)
+                        .take((positions[1] - positions[0] + 1) as usize)
+                        .collect();
+                    json_payload += &text;
+                }
+                complete_json += &json_payload;
+            }
+            let json_data = JsonData::new(&complete_json);
+            result.push(json_data);
+        }
+        Ok(result)
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PrivateData {
     pub aes_key: String,
@@ -30,13 +94,6 @@ pub struct PrivateData {
 pub struct FullData {
     pub verifying_data: VerifyingData,
     pub private_data: PrivateData,
-}
-
-// AES Counter block info
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct BlockInfo {
-    pub id: usize,     // block id
-    pub mask: Vec<u8>, // block mask, 1u8 indicate this char is extracted
 }
 
 // TLS record data
@@ -59,91 +116,38 @@ pub struct VerifyingDataOpt {
     pub packets: Vec<HTTPPacketOpt>, // partial HTTP Packet
 }
 
+impl VerifyingDataOpt {
+    // implement verify interface for VerifyingDataOpt
+    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+        let mut result = vec![];
+        let cipher = Aes128Encryptor::from_hex(aes_key)?;
+
+        for packet in self.packets.iter() {
+            let mut complete_json = String::new();
+            for record in packet.records.iter() {
+                let nonce = hex::decode(&record.nonce)?;
+                let ciphertext = hex::decode(&record.ciphertext)?;
+
+                let counters = cipher.compute_selective_counters(&nonce, &record.blocks, ciphertext.len())?;
+                assert!(ciphertext.len() == counters.len());
+
+                let decrypted_msg: Vec<u8> = counters
+                    .iter()
+                    .zip(ciphertext.iter())
+                    .map(|(a, b)| a ^ b)
+                    .collect();
+                let text = String::from_utf8(decrypted_msg)?;
+                complete_json += &text;
+            }
+            let json_data = JsonData::new(&complete_json);
+            result.push(json_data);
+        }
+        Ok(result)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PartialData {
     pub verifying_data: VerifyingDataOpt,
     pub private_data: PrivateData,
 }
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct JsonData {
-    pub msg: serde_json::Value,
-}
-
-// tls record wrapper for partial prove
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PacketRecordOptVec {
-    pub packet_records: Vec<Vec<TLSRecordOpt>>,
-}
-
-// tls record wrapper for full prove
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PacketRecordVec {
-    pub packet_records: Vec<Vec<TLSRecord>>,
-}
-
-impl PacketRecordVec {
-    // PacketRecordVec constructor
-    pub fn new(packet_records: Vec<Vec<TLSRecord>>) -> PacketRecordVec {
-        PacketRecordVec { packet_records }
-    }
-}
-
-impl PacketRecordOptVec {
-    // PacketRecordOptVec constructor
-    pub fn new(packet_records: Vec<Vec<TLSRecordOpt>>) -> PacketRecordOptVec {
-        PacketRecordOptVec { packet_records }
-    }
-}
-
-impl JsonData {
-    pub fn new(msg: &str) -> JsonData {
-        let msg: serde_json::Value = serde_json::from_str(msg).unwrap();
-        JsonData { msg }
-    }
-
-    pub fn get_json_values(&self, json_paths: &[&str]) -> Vec<String> {
-        let mut vec: Vec<String> = vec![];
-        for json_path in json_paths.iter() {
-            let results = jsonpath_lib::select(&self.msg, json_path).unwrap();
-            for result in results.iter() {
-                let result = result.as_str().unwrap();
-                vec.push(result.to_string());
-            }
-        }
-        vec
-    }
-}
-
-impl VerifyingData {
-    // implement verify interface for VerifyingData
-    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
-        // verify aes ciphertext
-        self.verify_ciphertext(aes_key)
-    }
-
-    // get records
-    pub fn get_records(&self) -> String {
-        let records =
-            PacketRecordVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
-        serde_json::to_string(&records).unwrap()
-    }
-}
-
-impl VerifyingDataOpt {
-    // implement verify interface for VerifyingDataOpt
-    pub fn verify(&self, aes_key: &str) -> Result<()> {
-        // verify aes ciphertext
-        self.verify_ciphertext(aes_key)?;
-        Ok(())
-    }
-
-    // get records
-    pub fn get_records(&self) -> String {
-        let records =
-            PacketRecordOptVec::new(self.packets.iter().map(|p| p.records.clone()).collect());
-
-        serde_json::to_string(&records).unwrap()
-    }
-}
-

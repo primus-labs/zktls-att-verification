@@ -21,10 +21,6 @@ fn test_full_aes_verification() -> Result<()> {
         Err(e) => println!("verify failed: {}", e),
     };
 
-    let records = full_data.verifying_data.get_records();
-
-    println!("records: {}", records);
-
     Ok(())
 }
 
@@ -40,13 +36,9 @@ fn test_partial_aes_verification() -> Result<()> {
         .verifying_data
         .verify(&partial_data.private_data.aes_key)
     {
-        Ok(()) => println!("verify passed"),
+        Ok(vec) => println!("verify passed: {:?}", vec),
         Err(e) => println!("verify failed: {}", e),
     };
-
-    let records = partial_data.verifying_data.get_records();
-
-    println!("recrods: {}", records);
 
     Ok(())
 }
