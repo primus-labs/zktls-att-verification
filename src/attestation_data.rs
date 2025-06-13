@@ -1,4 +1,4 @@
-use crate::verification_data::{PrivateData, VerifyingData, JsonData};
+use crate::tls_data::{PrivateData, TLSData, JsonData};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use crate::ecdsa_utils::{ECDSASignature, encode_packed_address, encode_packed_u64, keccak256};
@@ -105,8 +105,8 @@ impl PublicData {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
         let data = &json_value["CompleteHttpResponseCiphertext"];
         let data = data.as_str().ok_or(anyhow!("parse CompleteHttpResponseCiphertext error"))?;
-        let verifying_data: VerifyingData = serde_json::from_str(&data)?;
-        let json_data_vec = verifying_data.verify(aes_key)?;
+        let tls_data: TLSData = serde_json::from_str(&data)?;
+        let json_data_vec = tls_data.verify(aes_key)?;
         Ok(json_data_vec)
     }
 

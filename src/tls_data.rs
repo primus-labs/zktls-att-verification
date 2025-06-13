@@ -40,13 +40,13 @@ pub struct HTTPPacket {
     pub records: Vec<TLSRecord>, // TLS Records, constructing full http packet
 }
 
-// Data to verify for full prove
+// TLS Data to verify for full prove
 #[derive(Debug, Serialize, Deserialize)]
-pub struct VerifyingData {
+pub struct TLSData {
     pub packets: Vec<HTTPPacket>, // HTTP Packet
 }
 
-impl VerifyingData {
+impl TLSData {
     // implement verify interface for VerifyingData
     pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let mut result = vec![];
@@ -91,8 +91,8 @@ pub struct PrivateData {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct FullData {
-    pub verifying_data: VerifyingData,
+pub struct FullTLSData {
+    pub tls_data: TLSData,
     pub private_data: PrivateData,
 }
 
@@ -112,11 +112,11 @@ pub struct HTTPPacketOpt {
 
 // Data to verify for partial prove
 #[derive(Debug, Serialize, Deserialize)]
-pub struct VerifyingDataOpt {
+pub struct TLSDataOpt {
     pub packets: Vec<HTTPPacketOpt>, // partial HTTP Packet
 }
 
-impl VerifyingDataOpt {
+impl TLSDataOpt {
     // implement verify interface for VerifyingDataOpt
     pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let mut result = vec![];
@@ -147,7 +147,7 @@ impl VerifyingDataOpt {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PartialData {
-    pub verifying_data: VerifyingDataOpt,
+pub struct PartialTLSData {
+    pub tls_data: TLSDataOpt,
     pub private_data: PrivateData,
 }

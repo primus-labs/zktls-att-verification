@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::fs;
-use verification_data::{FullData, PartialData};
-use zktls_att_verification::verification_data;
+use tls_data::{FullTLSData, PartialTLSData};
+use zktls_att_verification::tls_data;
 
 // verify ecdsa signature and aes ciphertext for full http response
 fn test_full_aes_verification() -> Result<()> {
@@ -9,10 +9,10 @@ fn test_full_aes_verification() -> Result<()> {
     let json_content = fs::read_to_string("./data/full_http_responses.json")?;
     println!("jsonContent: {}", json_content);
 
-    let full_data: FullData = serde_json::from_str(&json_content)?;
+    let full_data: FullTLSData = serde_json::from_str(&json_content)?;
     // verify full http response
     match full_data
-        .verifying_data
+        .tls_data
         .verify(&full_data.private_data.aes_key)
     {
         Ok(vec) => {
@@ -30,10 +30,10 @@ fn test_partial_aes_verification() -> Result<()> {
     let json_content = fs::read_to_string("./data/partial_http_responses.json")?;
     println!("jsonContent: {}", json_content);
 
-    let partial_data: PartialData = serde_json::from_str(&json_content)?;
+    let partial_data: PartialTLSData = serde_json::from_str(&json_content)?;
     // verify parital http response
     match partial_data
-        .verifying_data
+        .tls_data
         .verify(&partial_data.private_data.aes_key)
     {
         Ok(vec) => println!("verify passed: {:?}", vec),
