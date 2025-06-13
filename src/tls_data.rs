@@ -47,7 +47,7 @@ pub struct TLSData {
 }
 
 impl TLSData {
-    // implement verify interface for VerifyingData
+    // implement verify interface for TLSData
     pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let mut result = vec![];
         let cipher = Aes128Encryptor::from_hex(aes_key)?;
@@ -117,8 +117,8 @@ pub struct TLSDataOpt {
 }
 
 impl TLSDataOpt {
-    // implement verify interface for VerifyingDataOpt
-    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+    // implement verify interface for TLSDataOpt
+    pub fn verify(&self, aes_key: &str) -> Result<Vec<String>> {
         let mut result = vec![];
         let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
@@ -139,8 +139,7 @@ impl TLSDataOpt {
                 let text = String::from_utf8(decrypted_msg)?;
                 complete_json += &text;
             }
-            let json_data = JsonData::new(&complete_json);
-            result.push(json_data);
+            result.push(complete_json);
         }
         Ok(result)
     }
