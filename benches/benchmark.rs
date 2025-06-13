@@ -5,7 +5,10 @@ use zktls_att_verification::tls_data;
 
 // verify partial http response
 fn partial_verification(partial_tls_data: &PartialTLSData) {
-    partial_tls_data.tls_data.verify(&partial_tls_data.private_data.aes_key).unwrap();
+    partial_tls_data
+        .tls_data
+        .verify(&partial_tls_data.private_data.aes_key)
+        .unwrap();
 }
 
 // load partial tls data

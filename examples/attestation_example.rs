@@ -1,5 +1,5 @@
 use anyhow::Result;
-use attestation_data::{AttestationData, AttestationConfig};
+use attestation_data::{AttestationConfig, AttestationData};
 use std::fs;
 use zktls_att_verification::attestation_data;
 

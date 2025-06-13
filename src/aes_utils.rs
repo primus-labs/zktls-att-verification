@@ -1,6 +1,9 @@
-use aes::{cipher::{generic_array::GenericArray, BlockEncrypt, KeyInit}, Aes128};
+use aes::{
+    cipher::{generic_array::GenericArray, BlockEncrypt, KeyInit},
+    Aes128,
+};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use anyhow::{Result};
 
 // AES Counter block info
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -22,7 +25,6 @@ fn incr_nonce(nonce: &mut [u8; 4]) {
         }
     }
 }
-
 
 // Aes128Encryptor
 pub struct Aes128Encryptor {
@@ -52,20 +54,16 @@ impl Aes128Encryptor {
 
     // compute a serial of counters the total length of which
     // is `len` basing on `nonce`
-    pub fn compute_continuous_counters(
-        &self,
-        nonce: &[u8],
-        len: usize,
-    ) -> Result<Vec<u8>> {
+    pub fn compute_continuous_counters(&self, nonce: &[u8], len: usize) -> Result<Vec<u8>> {
         let mut result: Vec<u8> = vec![];
         let mut nonce_index: [u8; 4] = [0u8; 4];
-    
+
         incr_nonce(&mut nonce_index);
         while result.len() < len {
             incr_nonce(&mut nonce_index);
             let mut full_nonce = nonce.to_vec();
             full_nonce.extend(nonce_index);
-    
+
             let encrypted_counter = self.encrypt(&mut full_nonce)?;
             result.extend(encrypted_counter);
         }
@@ -84,14 +82,14 @@ impl Aes128Encryptor {
     ) -> Result<Vec<u8>> {
         let mut result: Vec<u8> = vec![];
         let mut nonce_index: [u8; 4] = [0u8; 4];
-    
+
         let block_len: Vec<usize> = blocks
             .iter()
             .map(|info| info.mask.iter().sum::<u8>() as usize)
             .collect();
         let all_len: usize = block_len.iter().sum();
         assert!(all_len == len);
-    
+
         let mut block_index: usize = 0;
         incr_nonce(&mut nonce_index);
         while result.len() < len {
@@ -101,7 +99,7 @@ impl Aes128Encryptor {
                 let mask = &blocks[block_index].mask;
                 let mut full_nonce = nonce.to_vec();
                 full_nonce.extend(nonce_index);
-    
+
                 let full_nonce = self.encrypt(&mut full_nonce)?;
                 let masked_data: Vec<u8> = full_nonce
                     .into_iter()
@@ -110,7 +108,7 @@ impl Aes128Encryptor {
                     .map(|(a, _b)| a)
                     .collect();
                 result.extend(masked_data);
-    
+
                 block_index += 1;
             }
         }

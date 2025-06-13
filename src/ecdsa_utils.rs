@@ -7,7 +7,7 @@ use tiny_keccak::{Hasher, Keccak};
 pub fn encode_packed_u64(n: u64) -> Vec<u8> {
     let mut bytes: Vec<u8> = vec![];
     for i in 0..8 {
-        bytes.push((n >> (7 - i) * 8) as u8);
+        bytes.push((n >> ((7 - i) * 8)) as u8);
     }
     bytes
 }
@@ -38,13 +38,13 @@ fn public_key_to_address(public_key: &PublicKey) -> Result<Vec<u8>> {
 
 // struct `ECDSASignature` definition
 pub struct ECDSASignature {
-    secp256k1: Secp256k1<VerifyOnly>,  // `Secp256k1`, it can only be used for verification
+    secp256k1: Secp256k1<VerifyOnly>, // `Secp256k1`, it can only be used for verification
     signature: ecdsa::RecoverableSignature, // signature for public key recovery
 }
 
 // `ECDSASignature` implementation
 impl ECDSASignature {
-    // construct `ECDSASignature` from hex-string, leading `0x` is optional 
+    // construct `ECDSASignature` from hex-string, leading `0x` is optional
     pub fn from_hex(signature: &str) -> Result<ECDSASignature> {
         let secp = Secp256k1::<VerifyOnly>::verification_only();
         let sig_hex = signature.strip_prefix("0x").unwrap_or(signature);
@@ -66,5 +66,4 @@ impl ECDSASignature {
         let address = public_key_to_address(&public_key)?;
         Ok(address)
     }
-
 }

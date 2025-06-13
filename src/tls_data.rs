@@ -1,6 +1,7 @@
-use serde::{Deserialize, Serialize};
+use crate::aes_utils::{Aes128Encryptor, BlockInfo};
 use anyhow::{anyhow, Result};
-use crate::aes_utils::{BlockInfo, Aes128Encryptor};
+use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 // `serde_json::Value` wrapper
 #[derive(Debug, Serialize, Deserialize)]
@@ -8,21 +9,28 @@ pub struct JsonData {
     pub msg: serde_json::Value,
 }
 
-// `JsonData` implementations
-impl JsonData {
+// implement trait `FromStr` for `JsonData`
+impl FromStr for JsonData {
     // construct `JsonData` from json-string
-    pub fn from_str(msg: &str) -> Result<JsonData> {
+    fn from_str(msg: &str) -> Result<Self> {
         let msg: serde_json::Value = serde_json::from_str(msg)?;
         Ok(JsonData { msg })
     }
 
+    type Err = anyhow::Error;
+}
+
+// `JsonData` implementations
+impl JsonData {
     // get json values by json path
     pub fn get_json_values(&self, json_paths: &[&str]) -> Result<Vec<String>> {
         let mut vec: Vec<String> = vec![];
         for json_path in json_paths.iter() {
             let results = jsonpath_lib::select(&self.msg, json_path)?;
             for result in results.iter() {
-                let result = result.as_str().ok_or(anyhow!("get json path {} error", json_path))?;
+                let result = result
+                    .as_str()
+                    .ok_or(anyhow!("get json path {} error", json_path))?;
                 vec.push(result.to_string());
             }
         }
@@ -99,7 +107,7 @@ pub struct PrivateData {
 // `FullTLSData` definitions
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FullTLSData {
-    pub tls_data: TLSData,   // tls data
+    pub tls_data: TLSData,         // tls data
     pub private_data: PrivateData, // private data, including aes key
 }
 
@@ -143,7 +151,8 @@ impl TLSDataOpt {
                 let nonce = hex::decode(&record.nonce)?;
                 let ciphertext = hex::decode(&record.ciphertext)?;
 
-                let counters = cipher.compute_selective_counters(&nonce, &record.blocks, ciphertext.len())?;
+                let counters =
+                    cipher.compute_selective_counters(&nonce, &record.blocks, ciphertext.len())?;
                 assert!(ciphertext.len() == counters.len());
 
                 let decrypted_msg: Vec<u8> = counters
@@ -163,8 +172,8 @@ impl TLSDataOpt {
 // `PartialTLSData` definitions
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PartialTLSData {
-    pub tls_data: TLSDataOpt,   // tls data opt
-    pub private_data: PrivateData,  // private data, including aes key
+    pub tls_data: TLSDataOpt,      // tls data opt
+    pub private_data: PrivateData, // private data, including aes key
 }
 
 // `PartialTLSData` implementations

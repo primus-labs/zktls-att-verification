@@ -1,7 +1,7 @@
-use crate::tls_data::{PrivateData, TLSData, JsonData};
+use crate::ecdsa_utils::{encode_packed_address, encode_packed_u64, keccak256, ECDSASignature};
+use crate::tls_data::{JsonData, PrivateData, TLSData};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
-use crate::ecdsa_utils::{ECDSASignature, encode_packed_address, encode_packed_u64, keccak256};
 
 // `RequestData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -68,15 +68,15 @@ pub struct Attestor {
 #[allow(non_snake_case)]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PublicData {
-    pub recipient: String,     // recipient address
-    pub request: RequestData,  // request data
-    pub reponseResolve: Vec<ResponseResolve>,   // response resolve
-    pub data: String,                           // attestation data
-    pub attConditions: String,                  // attestation conditio
-    pub timestamp: u64,                         // attestation timestamp
-    pub additionParams: String,                 // addition params
-    pub attestors: Vec<Attestor>,               // allowed attestor collection
-    pub signatures: Vec<String>,                // the signature of the attestation
+    pub recipient: String,                    // recipient address
+    pub request: RequestData,                 // request data
+    pub reponseResolve: Vec<ResponseResolve>, // response resolve
+    pub data: String,                         // attestation data
+    pub attConditions: String,                // attestation conditio
+    pub timestamp: u64,                       // attestation timestamp
+    pub additionParams: String,               // addition params
+    pub attestors: Vec<Attestor>,             // allowed attestor collection
+    pub signatures: Vec<String>,              // the signature of the attestation
 }
 
 // `PublicData` implementations
@@ -108,7 +108,7 @@ impl PublicData {
         let address = ecdsa_signature.recover(&self.hash()?)?;
 
         let signer_addr = signer_addr.strip_prefix("0x").unwrap_or(signer_addr);
-        let signer_addr = hex::decode(&signer_addr)?;
+        let signer_addr = hex::decode(signer_addr)?;
         if signer_addr == address {
             return Ok(());
         }
@@ -121,8 +121,10 @@ impl PublicData {
     fn verify_aes_ciphertext(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
         let data = &json_value["CompleteHttpResponseCiphertext"];
-        let data = data.as_str().ok_or(anyhow!("parse CompleteHttpResponseCiphertext error"))?;
-        let tls_data: TLSData = serde_json::from_str(&data)?;
+        let data = data
+            .as_str()
+            .ok_or(anyhow!("parse CompleteHttpResponseCiphertext error"))?;
+        let tls_data: TLSData = serde_json::from_str(data)?;
         let json_data_vec = tls_data.verify(aes_key)?;
         Ok(json_data_vec)
     }
@@ -148,8 +150,8 @@ impl PublicData {
 // `AttestationData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AttestationData {
-    pub public_data: PublicData,  // public data
-    pub private_data: PrivateData,// private data, including aes key
+    pub public_data: PublicData,   // public data
+    pub private_data: PrivateData, // private data, including aes key
 }
 
 // `AttestiongData`` implementations
@@ -163,7 +165,6 @@ impl AttestationData {
 // `AttestationConfig` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AttestationConfig {
-    pub attestor_addr: String,   // the attestor address
-    pub url: Vec<String>,        // the attestation url
+    pub attestor_addr: String, // the attestor address
+    pub url: Vec<String>,      // the attestation url
 }
-

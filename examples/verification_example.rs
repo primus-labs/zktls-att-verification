@@ -11,9 +11,7 @@ fn test_full_aes_verification() -> Result<()> {
 
     let full_data: FullTLSData = serde_json::from_str(&json_content)?;
     // verify full http response
-    match full_data
-        .verify()
-    {
+    match full_data.verify() {
         Ok(vec) => {
             println!("verify passed: {:?}", vec);
         }
@@ -31,9 +29,7 @@ fn test_partial_aes_verification() -> Result<()> {
 
     let partial_data: PartialTLSData = serde_json::from_str(&json_content)?;
     // verify parital http response
-    match partial_data
-        .verify()
-    {
+    match partial_data.verify() {
         Ok(vec) => println!("verify passed: {:?}", vec),
         Err(e) => println!("verify failed: {}", e),
     };
