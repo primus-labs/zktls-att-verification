@@ -29,6 +29,7 @@ pub struct Aes128Encryptor {
     cipher: Aes128,
 }
 
+// Aes128Encryptor implementation
 impl Aes128Encryptor {
     // construct Aes128Encryptor from bytes
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self> {
@@ -49,6 +50,8 @@ impl Aes128Encryptor {
         Ok(msg.to_vec())
     }
 
+    // compute a serial of counters the total length of which
+    // is `len` basing on `nonce`
     pub fn compute_continuous_counters(
         &self,
         nonce: &[u8],

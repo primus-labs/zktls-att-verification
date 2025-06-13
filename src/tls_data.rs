@@ -1,28 +1,32 @@
 use serde::{Deserialize, Serialize};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use crate::aes_utils::{BlockInfo, Aes128Encryptor};
 
+// `serde_json::Value` wrapper
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JsonData {
     pub msg: serde_json::Value,
 }
 
+// `JsonData` implementations
 impl JsonData {
-    pub fn new(msg: &str) -> JsonData {
-        let msg: serde_json::Value = serde_json::from_str(msg).unwrap();
-        JsonData { msg }
+    // construct `JsonData` from json-string
+    pub fn from_str(msg: &str) -> Result<JsonData> {
+        let msg: serde_json::Value = serde_json::from_str(msg)?;
+        Ok(JsonData { msg })
     }
 
-    pub fn get_json_values(&self, json_paths: &[&str]) -> Vec<String> {
+    // get json values by json path
+    pub fn get_json_values(&self, json_paths: &[&str]) -> Result<Vec<String>> {
         let mut vec: Vec<String> = vec![];
         for json_path in json_paths.iter() {
-            let results = jsonpath_lib::select(&self.msg, json_path).unwrap();
+            let results = jsonpath_lib::select(&self.msg, json_path)?;
             for result in results.iter() {
-                let result = result.as_str().unwrap();
+                let result = result.as_str().ok_or(anyhow!("get json path {} error", json_path))?;
                 vec.push(result.to_string());
             }
         }
-        vec
+        Ok(vec)
     }
 }
 
@@ -46,6 +50,7 @@ pub struct TLSData {
     pub packets: Vec<HTTPPacket>, // HTTP Packet
 }
 
+// `TLSData` implementations
 impl TLSData {
     // implement verify interface for TLSData
     pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
@@ -78,22 +83,31 @@ impl TLSData {
                 }
                 complete_json += &json_payload;
             }
-            let json_data = JsonData::new(&complete_json);
+            let json_data = JsonData::from_str(&complete_json)?;
             result.push(json_data);
         }
         Ok(result)
     }
 }
 
+// `PrivateData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PrivateData {
-    pub aes_key: String,
+    pub aes_key: String, // aes key
 }
 
+// `FullTLSData` definitions
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FullTLSData {
-    pub tls_data: TLSData,
-    pub private_data: PrivateData,
+    pub tls_data: TLSData,   // tls data
+    pub private_data: PrivateData, // private data, including aes key
+}
+
+// `FullTLSData` implementations
+impl FullTLSData {
+    pub fn verify(&self) -> Result<Vec<JsonData>> {
+        self.tls_data.verify(&self.private_data.aes_key)
+    }
 }
 
 // TLS record data
@@ -116,6 +130,7 @@ pub struct TLSDataOpt {
     pub packets: Vec<HTTPPacketOpt>, // partial HTTP Packet
 }
 
+// `TLSDataOpt` implementations
 impl TLSDataOpt {
     // implement verify interface for TLSDataOpt
     pub fn verify(&self, aes_key: &str) -> Result<Vec<String>> {
@@ -145,8 +160,16 @@ impl TLSDataOpt {
     }
 }
 
+// `PartialTLSData` definitions
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PartialTLSData {
-    pub tls_data: TLSDataOpt,
-    pub private_data: PrivateData,
+    pub tls_data: TLSDataOpt,   // tls data opt
+    pub private_data: PrivateData,  // private data, including aes key
+}
+
+// `PartialTLSData` implementations
+impl PartialTLSData {
+    pub fn verify(&self) -> Result<Vec<String>> {
+        self.tls_data.verify(&self.private_data.aes_key)
+    }
 }
