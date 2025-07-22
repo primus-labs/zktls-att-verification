@@ -1,0 +1,30 @@
+{
+  "recipient": "0xB12a1f7035FdCBB4cC5Fa102C01346BD45439Adf",
+  "request": {
+    "url": "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true",
+    "header": "",
+    "method": "GET",
+    "body": ""
+  },
+  "reponseResolve": [
+    {
+      "keyName": "screen_name",
+      "parseType": "",
+      "parsePath": "$.screen_name"
+    }
+  ],
+  "data": "{\"screen_name\":\"wenjun_yuan1\"}",
+  "attConditions": "[{\"op\":\"REVEAL_STRING\",\"field\":\"$.screen_name\"}]",
+  "timestamp": 1753152796446,
+  "additionParams": "{\"algorithmType\":\"proxytls\"}",
+  "attestors": [
+    {
+      "attestorAddr": "0xdb736b13e2f522dbe18b2015d0291e4b193d8ef6",
+      "url": "https://primuslabs.xyz"
+    }
+  ],
+  "signatures": [
+    "0x2c4674b783e990203e21e6dafb890c131f4c86960e1e429fa0322ccbe967f6296cf380104601bcd749832602fae4ea3bfff37e915cc31ae7c06a9fa3729f67c41b"
+  ],
+  "extendedData": "{\"screen_name\":\"wenjun_yuan1\"}"
+}

@@ -44,3 +44,7 @@ path = "examples/verification_example.rs"
 [[example]]
 name = "attestation_example"
 path = "examples/attestation_example.rs"
+
+[[example]]
+name = "attestation_example_without_aes"
+path = "examples/attestation_example_without_aes.rs"

@@ -132,11 +132,28 @@ impl PublicData {
     // check whether the attestation url is in the allowed url list
     fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
         for url in allowed_urls.iter() {
-            if url == &self.request.url {
+            if self.request.url.starts_with(url) {
                 return Ok(());
             }
         }
         Err(anyhow!("fail to check url"))
+    }
+
+    // check whether the parse path is in the allowed path list
+    fn verify_path(&self, allowed_paths: &[String]) -> Result<()> {
+        for resolve in self.reponseResolve.iter() {
+            let mut is_exist = false;
+            for path in allowed_paths.iter() {
+                if path == &resolve.parsePath {
+                    is_exist = true;
+                }
+            }
+
+            if !is_exist {
+                return Err(anyhow!("fail to check parse path"));
+            }
+        }
+        Ok(())
     }
 
     // verify the attestation, including attestation url, ecdsa signature and aes ciphertext
@@ -144,6 +161,13 @@ impl PublicData {
         self.verify_url(&config.url)?;
         self.verify_signature(&config.attestor_addr)?;
         self.verify_aes_ciphertext(aes_key)
+    }
+
+    // verify the attestation, including attestation url, ecdsa signature
+    pub fn verify_without_aes(&self, config: &AttestationConfig) -> Result<()> {
+        self.verify_url(&config.url)?;
+        self.verify_path(&config.path)?;
+        self.verify_signature(&config.attestor_addr)
     }
 }
 
@@ -167,4 +191,5 @@ impl AttestationData {
 pub struct AttestationConfig {
     pub attestor_addr: String, // the attestor address
     pub url: Vec<String>,      // the attestation url
+    pub path: Vec<String>,     // the parse path
 }
