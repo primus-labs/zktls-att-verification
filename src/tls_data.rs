@@ -1,5 +1,5 @@
 use crate::aes_utils::{Aes128Encryptor, BlockInfo};
-use anyhow::{anyhow, Result};
+use anyhow::{Result};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -28,9 +28,6 @@ impl JsonData {
         for json_path in json_paths.iter() {
             let results = jsonpath_lib::select(&self.msg, json_path)?;
             for result in results.iter() {
-                let result = result
-                    .as_str()
-                    .ok_or(anyhow!("get json path {} error", json_path))?;
                 vec.push(result.to_string());
             }
         }
