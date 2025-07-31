@@ -169,10 +169,10 @@ pub struct AttestationConfig {
     pub url: Vec<String>,      // the attestation url
 }
 
-pub fn verify_attestation_data(data: &str, config: &str) -> Result<Vec<JsonData>> {
+pub fn verify_attestation_data(data: &str, config: &str) -> Result<(AttestationData, AttestationConfig, Vec<JsonData>)> {
     let attestation_data: AttestationData = serde_json::from_str(data)?;
     let attestation_config: AttestationConfig = serde_json::from_str(config)?;
     // verify attestation data according to attestation config
     let messages = attestation_data.verify(&attestation_config)?;
-    Ok(messages)
+    Ok((attestation_data, attestation_config, messages))
 }

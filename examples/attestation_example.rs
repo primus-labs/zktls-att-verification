@@ -9,7 +9,7 @@ fn main() -> Result<()> {
     // read attestation config
     let attestation_config = fs::read_to_string("data/config.json")?;
 
-    let messages = verify_attestation_data(&attestation_data, &attestation_config)?;
+    let (_attestation_data, _attestation_config, messages) = verify_attestation_data(&attestation_data, &attestation_config)?;
 
     // get json values by json paths in decrypted json string
     let mut json_paths = vec![];
