@@ -1,5 +1,5 @@
 use crate::aes_utils::{Aes128Encryptor, BlockInfo};
-use anyhow::{Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
