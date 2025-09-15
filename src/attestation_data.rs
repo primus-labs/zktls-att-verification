@@ -1,5 +1,5 @@
 use crate::ecdsa_utils::{encode_packed_address, encode_packed_u64, keccak256, ECDSASignature};
-use crate::tls_data::{JsonData, PrivateData, TLSData};
+use crate::tls_data::{JsonData, PrivateData, TLSData, TLSDataOpt};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
@@ -86,8 +86,14 @@ impl PublicData {
         let mut packed: Vec<u8> = vec![];
         packed.extend(encode_packed_address(&self.recipient)?);
         packed.extend(self.request.hash());
-        for rr in self.reponseResolve.iter() {
-            packed.extend(rr.hash());
+        if self.reponseResolve.len() == 1 {
+            packed.extend(self.reponseResolve[0].hash());
+        } else {
+            let mut vec = vec![];
+            for rr in self.reponseResolve.iter() {
+                vec.extend(rr.encode_packed());
+            }
+            packed.extend(keccak256(&vec).to_vec());
         }
         packed.extend(self.data.as_bytes());
         packed.extend(self.attConditions.as_bytes());
@@ -120,19 +126,30 @@ impl PublicData {
     // and check whether it is a valid json string
     fn verify_aes_ciphertext(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
-        let data = &json_value["CompleteHttpResponseCiphertext"];
-        let data = data
-            .as_str()
-            .ok_or(anyhow!("parse CompleteHttpResponseCiphertext error"))?;
-        let tls_data: TLSData = serde_json::from_str(data)?;
-        let json_data_vec = tls_data.verify(aes_key)?;
+        let mut json_data_vec: Vec<JsonData> = vec![];
+        if json_value.get("CompleteHttpResponseCiphertext").is_some() {
+            let data = &json_value["CompleteHttpResponseCiphertext"];
+            let data = data
+                .as_str()
+                .ok_or(anyhow!("parse CompleteHttpResponseCiphertext error"))?;
+            let tls_data: TLSData = serde_json::from_str(data)?;
+            json_data_vec = tls_data.verify(aes_key)?;
+        } else if json_value.get("PartialHttpResponseCiphertext").is_some() {
+            let data = &json_value["PartialHttpResponseCiphertext"];
+            let data = data
+                .as_str()
+                .ok_or(anyhow!("parse PartialHttpResponseCiphertext error"))?;
+            let tls_data_opt: TLSDataOpt = serde_json::from_str(data)?;
+            json_data_vec = tls_data_opt.verify(aes_key)?;
+        }
+
         Ok(json_data_vec)
     }
 
     // check whether the attestation url is in the allowed url list
     fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
         for url in allowed_urls.iter() {
-            if url == &self.request.url {
+            if self.request.url.starts_with(url) {
                 return Ok(());
             }
         }
@@ -169,7 +186,10 @@ pub struct AttestationConfig {
     pub url: Vec<String>,      // the attestation url
 }
 
-pub fn verify_attestation_data(data: &str, config: &str) -> Result<(AttestationData, AttestationConfig, Vec<JsonData>)> {
+pub fn verify_attestation_data(
+    data: &str,
+    config: &str,
+) -> Result<(AttestationData, AttestationConfig, Vec<JsonData>)> {
     let attestation_data: AttestationData = serde_json::from_str(data)?;
     let attestation_config: AttestationConfig = serde_json::from_str(config)?;
     // verify attestation data according to attestation config

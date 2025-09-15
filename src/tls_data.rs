@@ -138,7 +138,7 @@ pub struct TLSDataOpt {
 // `TLSDataOpt` implementations
 impl TLSDataOpt {
     // implement verify interface for TLSDataOpt
-    pub fn verify(&self, aes_key: &str) -> Result<Vec<String>> {
+    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let mut result = vec![];
         let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
@@ -160,7 +160,8 @@ impl TLSDataOpt {
                 let text = String::from_utf8(decrypted_msg)?;
                 complete_json += &text;
             }
-            result.push(complete_json);
+            let json_data = JsonData::from_str(&complete_json)?;
+            result.push(json_data);
         }
         Ok(result)
     }
@@ -175,7 +176,7 @@ pub struct PartialTLSData {
 
 // `PartialTLSData` implementations
 impl PartialTLSData {
-    pub fn verify(&self) -> Result<Vec<String>> {
+    pub fn verify(&self) -> Result<Vec<JsonData>> {
         self.tls_data.verify(&self.private_data.aes_key)
     }
 }

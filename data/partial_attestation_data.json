@@ -1,0 +1,39 @@
+{
+    "public_data": {
+        "recipient": "0x7ab44DE0156925fe0c24482a2cDe48C465e47573",
+        "request": {
+            "url": "https://x.com/i/api/graphql/96tVxbPqMZDoYB5pmzezKA/UserByScreenName?variables=%7B%22screen_name%22%3A%22primus_labs%22%2C%22withGrokTranslatedBio%22%3Afalse%7D&features=%7B%22hidden_profile_subscriptions_enabled%22%3Atrue%2C%22payments_enabled%22%3Afalse%2C%22profile_label_improvements_pcf_label_in_post_enabled%22%3Atrue%2C%22rweb_tipjar_consumption_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22subscriptions_verification_info_is_identity_verified_enabled%22%3Atrue%2C%22subscriptions_verification_info_verified_since_enabled%22%3Atrue%2C%22highlights_tweets_tab_ui_enabled%22%3Atrue%2C%22responsive_web_twitter_article_notes_tab_enabled%22%3Atrue%2C%22subscriptions_feature_can_gift_premium%22%3Atrue%2C%22creator_subscriptions_tweet_preview_api_enabled%22%3Atrue%2C%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3Afalse%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%7D&fieldToggles=%7B%22withAuxiliaryUserLabels%22%3Atrue%7D",
+            "header": "",
+            "method": "GET",
+            "body": ""
+        },
+        "reponseResolve": [
+            {
+                "keyName": "",
+                "parseType": "",
+                "parsePath": "$.data.user.result.legacy.followers_count"
+            },
+            {
+                "keyName": "",
+                "parseType": "",
+                "parsePath": "$.data.user.result.core.screen_name"
+            }
+        ],
+        "data": "{\"PartialHttpResponseCiphertext\":\"{\\\"packets\\\":[{\\\"records\\\":[{\\\"ciphertext\\\":\\\"0593e9aee46dc2e030c5a0035cb7cb12ff704651c603690001dcda\\\",\\\"nonce\\\":\\\"7ac64c700000000000000001\\\",\\\"blocks\\\":[{\\\"id\\\":81,\\\"mask\\\":[0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":82,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]}]},{\\\"ciphertext\\\":\\\"a05968340e9b4b05b76c03756392a889eb2090a4d4dde922a1cd03d234347e010ce5cd72614306a9826ef865bd5220445e815d518c5727d1a66a4d93254d69473012530f9873af\\\",\\\"nonce\\\":\\\"7ac64c700000000000000002\\\",\\\"blocks\\\":[{\\\"id\\\":11,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1]},{\\\"id\\\":12,\\\"mask\\\":[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":16,\\\"mask\\\":[0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":17,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":18,\\\"mask\\\":[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":25,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0]},{\\\"id\\\":48,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1]},{\\\"id\\\":49,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":50,\\\"mask\\\":[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":79,\\\"mask\\\":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}]},{\\\"ciphertext\\\":\\\"e21156f5\\\",\\\"nonce\\\":\\\"7ac64c700000000000000003\\\",\\\"blocks\\\":[{\\\"id\\\":49,\\\"mask\\\":[0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0]}]}]}]}\"}",
+        "attConditions": "[{\"op\":\"NONE\",\"field\":\"$.data.user.result.legacy.followers_count\"},{\"op\":\"NONE\",\"field\":\"$.data.user.result.core.screen_name\"}]",
+        "timestamp": 1757915073894,
+        "additionParams": "{\"algorithmType\":\"proxytls\"}",
+        "attestors": [
+            {
+                "attestorAddr": "0xe02bd7a6c8aa401189aebb5bad755c2610940a73",
+                "url": "https://primuslabs.xyz"
+            }
+        ],
+        "signatures": [
+            "0x535efd165ce829bb2c2c815308fd664e481b77caf2486fde51a6982faafdbee52b9ed46899c2930602c6763c7aeb5a6a28912066a8b33600f7dcbba8244b720a1c"
+        ]
+    },
+    "private_data": {
+        "aes_key": "8ba6ec68f0b1cccccc242d49040db6f5"
+    }
+}
