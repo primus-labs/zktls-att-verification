@@ -1,69 +1,48 @@
 use anyhow::Result;
 use std::fs;
-use verification_data::{VerifyingData, VerifyingDataOpt};
-use zktls_att_verification::verification_data;
+use tls_data::{FullTLSData, PartialTLSData};
+use zktls_att_verification::tls_data;
 
 // verify ecdsa signature and aes ciphertext for full http response
-fn test_full_aes_verification(verifying_key: &str) -> Result<()> {
+fn test_full_aes_verification() -> Result<()> {
     // load full http response
     let json_content = fs::read_to_string("./data/full_http_responses.json")?;
     println!("jsonContent: {}", json_content);
 
-    let verifying_data: VerifyingData = serde_json::from_str(&json_content)?;
+    let full_data: FullTLSData = serde_json::from_str(&json_content)?;
     // verify full http response
-    match verifying_data.verify(verifying_key) {
-        Ok(()) => println!("verify passed"),
+    match full_data.verify() {
+        Ok(vec) => {
+            println!("verify passed: {:?}", vec);
+        }
         Err(e) => println!("verify failed: {}", e),
     };
-
-    let aes_keys = verifying_data.get_aes_keys();
-    let signatures = verifying_data.get_signatures();
-    let messages = verifying_data.get_messages();
-    let records = verifying_data.get_records();
-
-    println!("aes keys: {}", aes_keys);
-    println!("signatures: {}", signatures);
-    println!("messages: {}", messages);
-    println!("records: {}", records);
 
     Ok(())
 }
 
 // verify ecdsa signature and aes ciphertext for partial http response
-fn test_partial_aes_verification(verifying_key: &str) -> Result<()> {
+fn test_partial_aes_verification() -> Result<()> {
     // load partial http response
     let json_content = fs::read_to_string("./data/partial_http_responses.json")?;
     println!("jsonContent: {}", json_content);
 
-    let verifying_data: VerifyingDataOpt = serde_json::from_str(&json_content)?;
+    let partial_data: PartialTLSData = serde_json::from_str(&json_content)?;
     // verify parital http response
-    match verifying_data.verify(verifying_key) {
-        Ok(()) => println!("verify passed"),
+    match partial_data.verify() {
+        Ok(vec) => println!("verify passed: {:?}", vec),
         Err(e) => println!("verify failed: {}", e),
     };
-
-    let aes_keys = verifying_data.get_aes_keys();
-    let signatures = verifying_data.get_signatures();
-    let messages = verifying_data.get_messages();
-    let records = verifying_data.get_records();
-
-    println!("aes keys: {}", aes_keys);
-    println!("signatures: {}", signatures);
-    println!("messages: {}", messages);
-    println!("recrods: {}", records);
 
     Ok(())
 }
 
 fn main() -> Result<()> {
-    // load verifying key
-    let public_key = fs::read_to_string("keys/verifying_k256.key")?;
-
     // verify full http response
-    test_full_aes_verification(&public_key)?;
+    test_full_aes_verification()?;
 
     // verify partial http response
-    test_partial_aes_verification(&public_key)?;
+    test_partial_aes_verification()?;
 
     Ok(())
 }

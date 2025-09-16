@@ -1,96 +1,69 @@
-use anyhow::{anyhow, Result};
-use hex;
-use k256::ecdsa::{
-    signature::{Signer, Verifier},
-    Signature, SigningKey, VerifyingKey,
-};
-use rand::RngCore;
-use std::str::FromStr;
+use anyhow::Result;
+use hex::FromHex;
+use secp256k1::{ecdsa, Message, PublicKey, Secp256k1, VerifyOnly};
+use tiny_keccak::{Hasher, Keccak};
 
-// ECDSASigner
-pub struct ECDSASigner {
-    signing_key: SigningKey,
+// encode `u64` into bytes
+pub fn encode_packed_u64(n: u64) -> Vec<u8> {
+    let mut bytes: Vec<u8> = vec![];
+    for i in 0..8 {
+        bytes.push((n >> ((7 - i) * 8)) as u8);
+    }
+    bytes
 }
 
-// ECDSAVerifier
-pub struct ECDSAVerifier {
-    verifying_key: VerifyingKey,
+// encode `address` into bytes
+pub fn encode_packed_address(addr: &str) -> Result<Vec<u8>> {
+    let addr = addr.strip_prefix("0x").unwrap_or(addr);
+    let addr_bytes: [u8; 20] = <[u8; 20]>::from_hex(addr)?;
+    Ok(addr_bytes.to_vec())
 }
 
-impl ECDSASigner {
-    // construct ECDSASigner from random bytes
-    pub fn new() -> Result<ECDSASigner> {
-        let mut key: [u8; 32] = [0u8; 32];
-        rand::thread_rng().fill_bytes(&mut key);
-        Self::from_bytes(key.to_vec())
-    }
-
-    // construct ECDSASigner from bytes
-    pub fn from_bytes(bytes: Vec<u8>) -> Result<ECDSASigner> {
-        let key: SigningKey = SigningKey::from_slice(&bytes)?;
-        Ok(ECDSASigner { signing_key: key })
-    }
-
-    // construct ECDSASigner from hex
-    pub fn from_hex(bytes: &str) -> Result<ECDSASigner> {
-        let bytes = hex::decode(bytes)?;
-        Self::from_bytes(bytes)
-    }
-
-    // output signing key in bytes
-    pub fn to_bytes(&self) -> Vec<u8> {
-        self.signing_key.to_bytes().to_vec()
-    }
-
-    // output signing key in hex
-    pub fn to_hex(&self) -> String {
-        hex::encode(self.to_bytes())
-    }
-
-    // sign message using underlying signing key
-    pub fn sign(&self, message: Vec<u8>) -> Result<Vec<u8>> {
-        let signature: Signature = self.signing_key.try_sign(&message)?;
-        Ok(signature.to_vec())
-    }
+// compute `keccak` hash
+pub fn keccak256(data: &[u8]) -> [u8; 32] {
+    let mut hasher = Keccak::v256();
+    let mut output = [0u8; 32];
+    hasher.update(data);
+    hasher.finalize(&mut output);
+    output
 }
 
-impl ECDSAVerifier {
-    // construct ECDSAVerifier from bytes
-    pub fn from_bytes(bytes: Vec<u8>) -> Result<ECDSAVerifier> {
-        let key: VerifyingKey = VerifyingKey::from_sec1_bytes(&bytes)?;
-        Ok(ECDSAVerifier { verifying_key: key })
+// convert public key to ethereum address
+fn public_key_to_address(public_key: &PublicKey) -> Result<Vec<u8>> {
+    let public_key_bytes = public_key.serialize_uncompressed();
+    let public_key_hash = keccak256(&public_key_bytes[1..]);
+    let address = &public_key_hash[12..];
+    Ok(address.to_vec())
+}
+
+// struct `ECDSASignature` definition
+pub struct ECDSASignature {
+    secp256k1: Secp256k1<VerifyOnly>, // `Secp256k1`, it can only be used for verification
+    signature: ecdsa::RecoverableSignature, // signature for public key recovery
+}
+
+// `ECDSASignature` implementation
+impl ECDSASignature {
+    // construct `ECDSASignature` from hex-string, leading `0x` is optional
+    pub fn from_hex(signature: &str) -> Result<ECDSASignature> {
+        let secp = Secp256k1::<VerifyOnly>::verification_only();
+        let sig_hex = signature.strip_prefix("0x").unwrap_or(signature);
+        let sig_bytes = <[u8; 65]>::from_hex(sig_hex)?;
+        let v = i32::from((sig_bytes[64] - 27) % 4);
+        let recovery_id = ecdsa::RecoveryId::from_i32(v)?;
+        let sig = ecdsa::RecoverableSignature::from_compact(&sig_bytes[..64], recovery_id)?;
+
+        Ok(Self {
+            secp256k1: secp,
+            signature: sig,
+        })
     }
 
-    // construct ECDSAVerifier from hex
-    pub fn from_hex(bytes: &str) -> Result<ECDSAVerifier> {
-        let bytes = hex::decode(bytes)?;
-        Self::from_bytes(bytes)
-    }
-
-    // construct ECDSAVerifier from ECDSASigner
-    pub fn from_signer(signer: &ECDSASigner) -> Result<ECDSAVerifier> {
-        let signing_key = signer.to_bytes();
-        let signing_key = SigningKey::from_slice(&signing_key)?;
-
-        let verifying_key: VerifyingKey = VerifyingKey::from(signing_key);
-        Ok(ECDSAVerifier { verifying_key })
-    }
-
-    // output verifying key in bytes
-    pub fn to_bytes(&self) -> Vec<u8> {
-        self.verifying_key.to_sec1_bytes().to_vec()
-    }
-
-    // output verifying key in hex
-    pub fn to_hex(&self) -> String {
-        hex::encode(self.to_bytes())
-    }
-
-    // verify signature using underlying verifying key
-    pub fn verify(&self, message: Vec<u8>, signature: &str) -> Result<()> {
-        let signature = Signature::from_str(signature)?;
-        self.verifying_key
-            .verify(&message, &signature)
-            .map_err(|e| anyhow!(e))
+    // recover public key
+    pub fn recover(&self, hash: &[u8]) -> Result<Vec<u8>> {
+        let hash = Message::from_digest_slice(hash)?;
+        let public_key = self.secp256k1.recover_ecdsa(&hash, &self.signature)?;
+        let address = public_key_to_address(&public_key)?;
+        Ok(address)
     }
 }
