@@ -14,12 +14,8 @@ fn main() -> Result<()> {
 
     // get json values by json paths in decrypted json string
     let mut json_paths = vec![];
-    json_paths.push("$.data.spotVol"); // string
-    json_paths.push("$.data.b1NextLevel"); // number
-    json_paths.push("$.data.spotFree.show"); // boolean
-    json_paths.push("$.data.vipGift[*].itemInfos[0].cardParamDto.noticeMsgParamDto"); // null
-    json_paths.push("$.data.spotFree"); // object
-    json_paths.push("$.data.spotFree.coinNameList"); // array
+    json_paths.push("$.data.user.result.legacy.followers_count"); // number
+    json_paths.push("$.data.user.result.core.screen_name"); // string
 
     let json_value = messages[0].get_json_values(&json_paths);
     println!("json value:{:?}", json_value);
