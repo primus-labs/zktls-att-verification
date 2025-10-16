@@ -1,4 +1,4 @@
 {
     "attestor_addr": "0x22e1dbbcb3dacdbf7e1ff44cf15ecaf24f5bd6ee",
-    "url": ["https://www.okx.com"]
+    "url": ["https://www.okx.com/api/v5/public/instruments"]
 }
