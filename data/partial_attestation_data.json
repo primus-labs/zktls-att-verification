@@ -1,39 +1,66 @@
 {
-    "public_data": {
-        "recipient": "0x7ab44DE0156925fe0c24482a2cDe48C465e47573",
-        "request": {
-            "url": "https://x.com/i/api/graphql/96tVxbPqMZDoYB5pmzezKA/UserByScreenName?variables=%7B%22screen_name%22%3A%22primus_labs%22%2C%22withGrokTranslatedBio%22%3Afalse%7D&features=%7B%22hidden_profile_subscriptions_enabled%22%3Atrue%2C%22payments_enabled%22%3Afalse%2C%22profile_label_improvements_pcf_label_in_post_enabled%22%3Atrue%2C%22rweb_tipjar_consumption_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22subscriptions_verification_info_is_identity_verified_enabled%22%3Atrue%2C%22subscriptions_verification_info_verified_since_enabled%22%3Atrue%2C%22highlights_tweets_tab_ui_enabled%22%3Atrue%2C%22responsive_web_twitter_article_notes_tab_enabled%22%3Atrue%2C%22subscriptions_feature_can_gift_premium%22%3Atrue%2C%22creator_subscriptions_tweet_preview_api_enabled%22%3Atrue%2C%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3Afalse%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%7D&fieldToggles=%7B%22withAuxiliaryUserLabels%22%3Atrue%7D",
-            "header": "",
-            "method": "GET",
-            "body": ""
-        },
-        "reponseResolve": [
-            {
-                "keyName": "",
-                "parseType": "",
-                "parsePath": "$.data.user.result.legacy.followers_count"
+    "public_data": [
+        {
+            "attestation": {
+                "recipient": "0x810b7bacEfD5ba495bB688bbFD2501C904036AB7",
+                "request": [
+                    {
+                        "url": "https://www.okx.com/api/v5/public/instruments?instType=SPOT&instId=BTC-USD",
+                        "header": "",
+                        "method": "GET",
+                        "body": ""
+                    },
+                    {
+                        "url": "https://www.okx.com/api/v5/public/instruments?instType=SPOT&instId=ETH-USD",
+                        "header": "",
+                        "method": "GET",
+                        "body": ""
+                    }
+                ],
+                "responseResolves": [
+                    {
+                        "oneUrlResponseResolve": [
+                            {
+                                "keyName": "btc-ccy",
+                                "parseType": "",
+                                "parsePath": "$.data[*].baseCcy"
+                            },
+                            {
+                                "keyName": "btc-idCode",
+                                "parseType": "",
+                                "parsePath": "$.data[*].instIdCode"
+                            }
+                        ]
+                    },
+                    {
+                        "oneUrlResponseResolve": [
+                            {
+                                "keyName": "eth-ccy",
+                                "parseType": "",
+                                "parsePath": "$.data[*].baseCcy"
+                            },
+                            {
+                                "keyName": "eth-idCode",
+                                "parseType": "",
+                                "parsePath": "$.data[*].instIdCode"
+                            }
+                        ]
+                    }
+                ],
+                "data": "{\"PartialHttpResponseCiphertext\":\"{\\\"packets\\\":[{\\\"records\\\":[{\\\"ciphertext\\\":\\\"52a7991c9808a0f85377abc853870243140e253a15025c8f99d5f1f396a4229d986405eff96ceb0d3674a7a37d\\\",\\\"nonce\\\":\\\"a06be4a40000000000000001\\\",\\\"blocks\\\":[{\\\"id\\\":62,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]},{\\\"id\\\":63,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1]},{\\\"id\\\":64,\\\"mask\\\":[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":66,\\\"mask\\\":[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":67,\\\"mask\\\":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":76,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1]},{\\\"id\\\":77,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]}]},{\\\"ciphertext\\\":\\\"fd85b7\\\",\\\"nonce\\\":\\\"a06be4a40000000000000002\\\",\\\"blocks\\\":[{\\\"id\\\":25,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0]},{\\\"id\\\":26,\\\"mask\\\":[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0]}]}]},{\\\"records\\\":[{\\\"ciphertext\\\":\\\"4b8cef9a05cebb8a3599eb80f79007ccf0349bd14c64bddb900c0881561d26009f79a253d20b322fcfc721c164\\\",\\\"nonce\\\":\\\"a06be4a40000000000000003\\\",\\\"blocks\\\":[{\\\"id\\\":62,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]},{\\\"id\\\":63,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1]},{\\\"id\\\":64,\\\"mask\\\":[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":66,\\\"mask\\\":[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":67,\\\"mask\\\":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":76,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1]},{\\\"id\\\":77,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]}]},{\\\"ciphertext\\\":\\\"0fe8a4\\\",\\\"nonce\\\":\\\"a06be4a40000000000000004\\\",\\\"blocks\\\":[{\\\"id\\\":26,\\\"mask\\\":[0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0]}]}]}]}\",\"btc-ccy\":\"BTC\",\"btc-ccy.count\":\"1\",\"btc-idCode\":\"187360\",\"btc-idCode.count\":\"1\",\"eth-ccy\":\"ETH\",\"eth-ccy.count\":\"1\",\"eth-idCode\":\"187183\",\"eth-idCode.count\":\"1\"}",
+                "attConditions": "",
+                "timestamp": 1760581933248,
+                "additionParams": "{\"algorithmType\":\"proxytls\"}"
             },
-            {
-                "keyName": "",
-                "parseType": "",
-                "parsePath": "$.data.user.result.core.screen_name"
-            }
-        ],
-        "data": "{\"PartialHttpResponseCiphertext\":\"{\\\"packets\\\":[{\\\"records\\\":[{\\\"ciphertext\\\":\\\"0593e9aee46dc2e030c5a0035cb7cb12ff704651c603690001dcda\\\",\\\"nonce\\\":\\\"7ac64c700000000000000001\\\",\\\"blocks\\\":[{\\\"id\\\":81,\\\"mask\\\":[0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":82,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]}]},{\\\"ciphertext\\\":\\\"a05968340e9b4b05b76c03756392a889eb2090a4d4dde922a1cd03d234347e010ce5cd72614306a9826ef865bd5220445e815d518c5727d1a66a4d93254d69473012530f9873af\\\",\\\"nonce\\\":\\\"7ac64c700000000000000002\\\",\\\"blocks\\\":[{\\\"id\\\":11,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1]},{\\\"id\\\":12,\\\"mask\\\":[1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":16,\\\"mask\\\":[0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":17,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":18,\\\"mask\\\":[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":25,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0]},{\\\"id\\\":48,\\\"mask\\\":[0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1]},{\\\"id\\\":49,\\\"mask\\\":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":50,\\\"mask\\\":[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\\\"id\\\":79,\\\"mask\\\":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}]},{\\\"ciphertext\\\":\\\"e21156f5\\\",\\\"nonce\\\":\\\"7ac64c700000000000000003\\\",\\\"blocks\\\":[{\\\"id\\\":49,\\\"mask\\\":[0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0]}]}]}]}\"}",
-        "attConditions": "[{\"op\":\"NONE\",\"field\":\"$.data.user.result.legacy.followers_count\"},{\"op\":\"NONE\",\"field\":\"$.data.user.result.core.screen_name\"}]",
-        "timestamp": 1757915073894,
-        "additionParams": "{\"algorithmType\":\"proxytls\"}",
-        "attestors": [
-            {
-                "attestorAddr": "0xe02bd7a6c8aa401189aebb5bad755c2610940a73",
-                "url": "https://primuslabs.xyz"
-            }
-        ],
-        "signatures": [
-            "0x535efd165ce829bb2c2c815308fd664e481b77caf2486fde51a6982faafdbee52b9ed46899c2930602c6763c7aeb5a6a28912066a8b33600f7dcbba8244b720a1c"
-        ]
-    },
+            "attestor": "0x6aa8f4dc255261c15d29b2ab53e82fe78be2ee0e",
+            "signature": "0xec299c1896ac01b26ebe68a6b62a55a20b79b6877527b6e952daed57f53e6b5873da55163bfcc33aaff0e7aadd1d78336c45d82b232cec1a0b5395c55a2e5e2c1b",
+            "reportTxHash": "0xb222ea86de95313c7b3640a991c8d500288fff18abb01abc467534490757a361",
+            "taskId": "0x160eae4823afa5d9372ef645868e0c8e278879462b262ae8c49073c7fa920763",
+            "attestationTime": 26086,
+            "attestorUrl": "test-network-node1.primuslabs.xyz"
+        }
+    ],
     "private_data": {
-        "aes_key": "8ba6ec68f0b1cccccc242d49040db6f5"
+        "aes_key": "870f2f8aa9c90ae5e34a65e8972d9e76"
     }
 }

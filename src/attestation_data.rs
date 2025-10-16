@@ -56,6 +56,28 @@ impl ResponseResolve {
     }
 }
 
+// `OneUrlResponseResolve` definition
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct OneUrlResponseResolve {
+    pub oneUrlResponseResolve: Vec<ResponseResolve>,
+}
+
+// `OneUrlResponseResolve` implementation
+impl OneUrlResponseResolve {
+    pub fn encode_packed(&self) -> Vec<u8> {
+        let mut vec = vec![];
+        for rr in self.oneUrlResponseResolve.iter() {
+            vec.extend(rr.encode_packed());
+        }
+        vec
+    }
+
+    pub fn hash(&self) -> Vec<u8> {
+        keccak256(&self.encode_packed()).to_vec()
+    }
+}
+
 // `Attestor` definition
 #[allow(non_snake_case)]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -64,33 +86,42 @@ pub struct Attestor {
     pub url: String,          // the url of the attestation
 }
 
-// `PublicData` definition
+// `Attestation` definition
 #[allow(non_snake_case)]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PublicData {
-    pub recipient: String,                    // recipient address
-    pub request: RequestData,                 // request data
-    pub reponseResolve: Vec<ResponseResolve>, // response resolve
-    pub data: String,                         // attestation data
-    pub attConditions: String,                // attestation conditio
-    pub timestamp: u64,                       // attestation timestamp
-    pub additionParams: String,               // addition params
-    pub attestors: Vec<Attestor>,             // allowed attestor collection
-    pub signatures: Vec<String>,              // the signature of the attestation
+pub struct Attestation {
+    pub recipient: String,                            // recipient address
+    pub request: Vec<RequestData>,                    // request data
+    pub responseResolves: Vec<OneUrlResponseResolve>, // response resolve
+    pub data: String,                                 // attestation data
+    pub attConditions: String,                        // attestation conditio
+    pub timestamp: u64,                               // attestation timestamp
+    pub additionParams: String,                       // addition params
+                                                      // pub attestors: Vec<Attestor>,                     // allowed attestor collection
+                                                      // pub signatures: Vec<String>,                      // the signature of the attestation
 }
 
-// `PublicData` implementations
-impl PublicData {
-    // encode `PublicData` as abi.encodePacked in solidity
+// `Attestation` implementations
+impl Attestation {
+    // encode `Attestation` as abi.encodePacked in solidity
     fn encode_packed(&self) -> Result<Vec<u8>> {
         let mut packed: Vec<u8> = vec![];
         packed.extend(encode_packed_address(&self.recipient)?);
-        packed.extend(self.request.hash());
-        if self.reponseResolve.len() == 1 {
-            packed.extend(self.reponseResolve[0].hash());
+        // packed.extend(self.request.hash());
+        if self.request.len() == 1 {
+            packed.extend(self.request[0].hash());
         } else {
             let mut vec = vec![];
-            for rr in self.reponseResolve.iter() {
+            for r in self.request.iter() {
+                vec.extend(r.encode_packed());
+            }
+            packed.extend(keccak256(&vec).to_vec());
+        }
+        if self.responseResolves.len() == 1 {
+            packed.extend(self.responseResolves[0].hash());
+        } else {
+            let mut vec = vec![];
+            for rr in self.responseResolves.iter() {
                 vec.extend(rr.encode_packed());
             }
             packed.extend(keccak256(&vec).to_vec());
@@ -109,8 +140,8 @@ impl PublicData {
 
     // verify ecdsa signature by recovering signer address
     // and comparing with given address
-    fn verify_signature(&self, signer_addr: &str) -> Result<()> {
-        let ecdsa_signature = ECDSASignature::from_hex(&self.signatures[0])?;
+    fn verify_signature(&self, signer_addr: &str, signature: &str) -> Result<()> {
+        let ecdsa_signature = ECDSASignature::from_hex(signature)?;
         let address = ecdsa_signature.recover(&self.hash()?)?;
 
         let signer_addr = signer_addr.strip_prefix("0x").unwrap_or(signer_addr);
@@ -148,34 +179,72 @@ impl PublicData {
 
     // check whether the attestation url is in the allowed url list
     fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
-        for url in allowed_urls.iter() {
-            if self.request.url.starts_with(url) {
-                return Ok(());
+        for req in self.request.iter() {
+            let mut is_allowed = false;
+            for url in allowed_urls.iter() {
+                if req.url.starts_with(url) {
+                    is_allowed = true;
+                    break;
+                }
+            }
+            if !is_allowed {
+                return Err(anyhow!("fail to check url: {}", req.url));
             }
         }
-        Err(anyhow!("fail to check url"))
+        Ok(())
     }
 
     // verify the attestation, including attestation url, ecdsa signature and aes ciphertext
-    pub fn verify(&self, config: &AttestationConfig, aes_key: &str) -> Result<Vec<JsonData>> {
+    pub fn verify(
+        &self,
+        config: &AttestationConfig,
+        aes_key: &str,
+        signature: &str,
+    ) -> Result<Vec<JsonData>> {
         self.verify_url(&config.url)?;
-        self.verify_signature(&config.attestor_addr)?;
+        self.verify_signature(&config.attestor_addr, signature)?;
         self.verify_aes_ciphertext(aes_key)
+    }
+}
+
+// `Attestation` definiation
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct PublicData {
+    pub attestation: Attestation, // attestation
+    pub attestor: String,         // attestor
+    pub signature: String,        // signature
+    pub reportTxHash: String,     // reportTxHash
+    pub taskId: String,           // taskId
+    pub attestationTime: u64,     // attestationTime
+    pub attestorUrl: String,      // attestorUrl
+}
+
+// `Attestation` implementation
+impl PublicData {
+    // verify the attestation, including attestation url, ecdsa signature and aes ciphertext
+    pub fn verify(&self, config: &AttestationConfig, aes_key: &str) -> Result<Vec<JsonData>> {
+        self.attestation.verify(config, aes_key, &self.signature)
     }
 }
 
 // `AttestationData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AttestationData {
-    pub public_data: PublicData,   // public data
-    pub private_data: PrivateData, // private data, including aes key
+    pub public_data: Vec<PublicData>, // public data
+    pub private_data: PrivateData,    // private data, including aes key
 }
 
 // `AttestiongData`` implementations
 impl AttestationData {
     // verify the attestation
-    pub fn verify(&self, config: &AttestationConfig) -> Result<Vec<JsonData>> {
-        self.public_data.verify(config, &self.private_data.aes_key)
+    pub fn verify(&self, config: &AttestationConfig) -> Result<Vec<Vec<JsonData>>> {
+        let mut vec = vec![];
+        for data in self.public_data.iter() {
+            let json_data = data.verify(config, &self.private_data.aes_key)?;
+            vec.push(json_data);
+        }
+        Ok(vec)
     }
 }
 
@@ -189,7 +258,7 @@ pub struct AttestationConfig {
 pub fn verify_attestation_data(
     data: &str,
     config: &str,
-) -> Result<(AttestationData, AttestationConfig, Vec<JsonData>)> {
+) -> Result<(AttestationData, AttestationConfig, Vec<Vec<JsonData>>)> {
     let attestation_data: AttestationData = serde_json::from_str(data)?;
     let attestation_config: AttestationConfig = serde_json::from_str(config)?;
     // verify attestation data according to attestation config
