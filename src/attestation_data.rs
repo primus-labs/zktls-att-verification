@@ -1,7 +1,8 @@
 use crate::ecdsa_utils::{encode_packed_address, encode_packed_u64, keccak256, ECDSASignature};
-use crate::tls_data::{JsonData, PrivateData, TLSData, TLSDataOpt};
+use crate::tls_data::{JsonData, PrivateData, TLSData, TLSDataHash, TLSDataOpt, VerificationType};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 // `RequestData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -155,28 +156,33 @@ impl Attestation {
 
     // verify aes ciphertext: decrypt aes ciphertext
     // and check whether it is a valid json string
-    fn verify_tls_data(
-        &self,
-        verification_type: &str,
-        private_data: &PrivateData,
-    ) -> Result<Vec<JsonData>> {
+    fn verify_tls_data(&self, verification_type: &VerificationType) -> Result<Vec<JsonData>> {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
-        let mut json_data_vec: Vec<JsonData> = vec![];
-        if json_value.get("CompleteHttpResponseCiphertext").is_some() {
-            let data = &json_value["CompleteHttpResponseCiphertext"];
-            let data = data
-                .as_str()
-                .ok_or(anyhow!("parse CompleteHttpResponseCiphertext error"))?;
-            let tls_data: TLSData = serde_json::from_str(data)?;
-            json_data_vec = tls_data.verify(verification_type, private_data)?;
-        } else if json_value.get("PartialHttpResponseCiphertext").is_some() {
-            let data = &json_value["PartialHttpResponseCiphertext"];
-            let data = data
-                .as_str()
-                .ok_or(anyhow!("parse PartialHttpResponseCiphertext error"))?;
-            let tls_data_opt: TLSDataOpt = serde_json::from_str(data)?;
-            json_data_vec = tls_data_opt.verify(verification_type, private_data)?;
-        }
+        let json_data_vec: Vec<JsonData> = match verification_type {
+            VerificationType::AESDecryption(_) => {
+                if json_value.get("CompleteHttpResponseCiphertext").is_some() {
+                    let data = &json_value["CompleteHttpResponseCiphertext"];
+                    let data = data
+                        .as_str()
+                        .ok_or(anyhow!("parse CompleteHttpResponseCiphertext error"))?;
+                    let tls_data: TLSData = serde_json::from_str(data)?;
+                    tls_data.verify(verification_type)?
+                } else if json_value.get("PartialHttpResponseCiphertext").is_some() {
+                    let data = &json_value["PartialHttpResponseCiphertext"];
+                    let data = data
+                        .as_str()
+                        .ok_or(anyhow!("parse PartialHttpResponseCiphertext error"))?;
+                    let tls_data_opt: TLSDataOpt = serde_json::from_str(data)?;
+                    tls_data_opt.verify(verification_type)?
+                } else {
+                    return Err(anyhow::anyhow!("unknown data {}", self.data));
+                }
+            }
+            VerificationType::HashComparsion(_) => {
+                let tls_data_hash = TLSDataHash::from_str(&self.data)?;
+                tls_data_hash.verify(verification_type)?
+            }
+        };
 
         Ok(json_data_vec)
     }
@@ -202,13 +208,12 @@ impl Attestation {
     pub fn verify(
         &self,
         config: &AttestationConfig,
-        verification_type: &str,
-        private_data: &PrivateData,
+        verification_type: &VerificationType,
         signature: &str,
     ) -> Result<Vec<JsonData>> {
         self.verify_url(&config.url)?;
         self.verify_signature(&config.attestor_addr, signature)?;
-        self.verify_tls_data(verification_type, private_data)
+        self.verify_tls_data(verification_type)
     }
 }
 
@@ -231,11 +236,10 @@ impl PublicData {
     pub fn verify(
         &self,
         config: &AttestationConfig,
-        verification_type: &str,
-        private_data: &PrivateData,
+        verification_type: &VerificationType,
     ) -> Result<Vec<JsonData>> {
         self.attestation
-            .verify(config, verification_type, private_data, &self.signature)
+            .verify(config, verification_type, &self.signature)
     }
 }
 
@@ -252,8 +256,9 @@ impl AttestationData {
     // verify the attestation
     pub fn verify(&self, config: &AttestationConfig) -> Result<Vec<Vec<JsonData>>> {
         let mut vec = vec![];
+        let verification_type = VerificationType::new(&self.verification_type, &self.private_data)?;
         for data in self.public_data.iter() {
-            let json_data = data.verify(config, &self.verification_type, &self.private_data)?;
+            let json_data = data.verify(config, &verification_type)?;
             vec.push(json_data);
         }
         Ok(vec)

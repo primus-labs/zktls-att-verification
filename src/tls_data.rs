@@ -1,4 +1,5 @@
 use crate::aes_utils::{Aes128Encryptor, BlockInfo};
+use crate::sha_utils::sha256;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -35,6 +36,36 @@ impl JsonData {
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum VerificationType {
+    AESDecryption(String),
+    HashComparsion(Vec<PlainJsonResponse>),
+}
+
+impl VerificationType {
+    pub fn new(verification_type: &str, private_data: &PrivateData) -> Result<Self> {
+        match verification_type {
+            "AES_DECRYPTION" => {
+                let Some(aes_key) = &private_data.aes_key else {
+                    return Err(anyhow::anyhow!("aes key is empty"));
+                };
+                Ok(VerificationType::AESDecryption(aes_key.clone()))
+            }
+            "HASH_COMPARSION" => {
+                let Some(plain_json_response) = &private_data.plain_json_response else {
+                    return Err(anyhow::anyhow!("plain json response is empty"));
+                };
+                Ok(VerificationType::HashComparsion(
+                    plain_json_response.clone(),
+                ))
+            }
+            _ => Err(anyhow::anyhow!(
+                "unsupported verification type {}",
+                verification_type
+            )),
+        }
+    }
+}
 // TLS Record
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TLSRecord {
@@ -58,23 +89,14 @@ pub struct TLSData {
 // `TLSData` implementations
 impl TLSData {
     // implement verify interface for TLSData
-    pub fn verify(
-        &self,
-        verification_type: &str,
-        private_data: &PrivateData,
-    ) -> Result<Vec<JsonData>> {
+    pub fn verify(&self, verification_type: &VerificationType) -> Result<Vec<JsonData>> {
         match verification_type {
-            "AES_DECRYPTION" => {
-                let Some(aes_key) = &private_data.aes_key else {
-                    return Err(anyhow::anyhow!("aes key is empty"));
-                };
-                self.verify_aes(aes_key)
-            }
+            VerificationType::AESDecryption(aes_key) => self.verify_aes(aes_key),
             _ => {
                 return Err(anyhow::anyhow!(
-                    "unsupported verification type: {}",
+                    "unsupported verification type: {:?}",
                     verification_type
-                ))
+                ));
             }
         }
     }
@@ -117,11 +139,18 @@ impl TLSData {
     }
 }
 
+// `PlainJsonResponse` definition
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PlainJsonResponse {
+    pub id: String,
+    pub content: String,
+}
+
 // `PrivateData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PrivateData {
-    pub aes_key: Option<String>,                  // aes key
-    pub plain_json_response: Option<Vec<String>>, // plain json response
+    pub aes_key: Option<String>,                             // aes key
+    pub plain_json_response: Option<Vec<PlainJsonResponse>>, // plain json response
 }
 
 // `FullTLSData` definitions
@@ -135,8 +164,8 @@ pub struct FullTLSData {
 // `FullTLSData` implementations
 impl FullTLSData {
     pub fn verify(&self) -> Result<Vec<JsonData>> {
-        self.tls_data
-            .verify(&self.verification_type, &self.private_data)
+        let verification_type = VerificationType::new(&self.verification_type, &self.private_data)?;
+        self.tls_data.verify(&verification_type)
     }
 }
 
@@ -163,23 +192,14 @@ pub struct TLSDataOpt {
 // `TLSDataOpt` implementations
 impl TLSDataOpt {
     // implement verify interface for TLSDataOpt
-    pub fn verify(
-        &self,
-        verification_type: &str,
-        private_data: &PrivateData,
-    ) -> Result<Vec<JsonData>> {
+    pub fn verify(&self, verification_type: &VerificationType) -> Result<Vec<JsonData>> {
         match verification_type {
-            "AES_DECRYPTION" => {
-                let Some(aes_key) = &private_data.aes_key else {
-                    return Err(anyhow::anyhow!("aes key is empty"));
-                };
-                self.verify_aes(aes_key)
-            }
+            VerificationType::AESDecryption(aes_key) => self.verify_aes(aes_key),
             _ => {
                 return Err(anyhow::anyhow!(
-                    "unsupported verification type: {}",
+                    "unsupported verification type: {:?}",
                     verification_type
-                ))
+                ));
             }
         }
     }
@@ -225,7 +245,50 @@ pub struct PartialTLSData {
 // `PartialTLSData` implementations
 impl PartialTLSData {
     pub fn verify(&self) -> Result<Vec<JsonData>> {
-        self.tls_data
-            .verify(&self.verification_type, &self.private_data)
+        let verification_type = VerificationType::new(&self.verification_type, &self.private_data)?;
+        self.tls_data.verify(&verification_type)
+    }
+}
+
+// `TLSDataHash`definitions
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TLSDataHash {
+    pub hashes: serde_json::Value,
+}
+
+impl FromStr for TLSDataHash {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self> {
+        let hashes: serde_json::Value = serde_json::Value::from_str(s)?;
+        Ok(Self { hashes })
+    }
+}
+
+impl TLSDataHash {
+    pub fn verify(&self, verification_type: &VerificationType) -> Result<Vec<JsonData>> {
+        let mut vec = vec![];
+        let VerificationType::HashComparsion(plain_json_response) = verification_type else {
+            return Err(anyhow::anyhow!("empty plain json response"));
+        };
+        for response in plain_json_response.iter() {
+            let expected_hash = sha256(&response.content);
+            let committed_hash = match self.hashes.get(&response.id) {
+                Some(hash) => {
+                    let hash = hash.to_string();
+                    let hash = hash.trim_matches('"');
+
+                    let h = hash.strip_prefix("0x").unwrap_or(&hash);
+                    hex::decode(&h)?
+                }
+                None => return Err(anyhow::anyhow!("hash not find by {}", response.id)),
+            };
+            if expected_hash != committed_hash {
+                return Err(anyhow::anyhow!("check json response hash failed"));
+            }
+
+            let json_data: JsonData = JsonData::from_str(&response.content)?;
+            vec.push(json_data);
+        }
+        Ok(vec)
     }
 }
