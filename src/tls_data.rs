@@ -58,7 +58,29 @@ pub struct TLSData {
 // `TLSData` implementations
 impl TLSData {
     // implement verify interface for TLSData
-    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+    pub fn verify(
+        &self,
+        verification_type: &str,
+        private_data: &PrivateData,
+    ) -> Result<Vec<JsonData>> {
+        match verification_type {
+            "AES_DECRYPTION" => {
+                let Some(aes_key) = &private_data.aes_key else {
+                    return Err(anyhow::anyhow!("aes key is empty"));
+                };
+                self.verify_aes(aes_key)
+            }
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "unsupported verification type: {}",
+                    verification_type
+                ))
+            }
+        }
+    }
+
+    // implement verify interface for TLSData
+    pub fn verify_aes(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let mut result = vec![];
         let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
@@ -98,12 +120,14 @@ impl TLSData {
 // `PrivateData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PrivateData {
-    pub aes_key: String, // aes key
+    pub aes_key: Option<String>,                  // aes key
+    pub plain_json_response: Option<Vec<String>>, // plain json response
 }
 
 // `FullTLSData` definitions
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FullTLSData {
+    pub verification_type: String, // verification type
     pub tls_data: TLSData,         // tls data
     pub private_data: PrivateData, // private data, including aes key
 }
@@ -111,7 +135,8 @@ pub struct FullTLSData {
 // `FullTLSData` implementations
 impl FullTLSData {
     pub fn verify(&self) -> Result<Vec<JsonData>> {
-        self.tls_data.verify(&self.private_data.aes_key)
+        self.tls_data
+            .verify(&self.verification_type, &self.private_data)
     }
 }
 
@@ -138,7 +163,29 @@ pub struct TLSDataOpt {
 // `TLSDataOpt` implementations
 impl TLSDataOpt {
     // implement verify interface for TLSDataOpt
-    pub fn verify(&self, aes_key: &str) -> Result<Vec<JsonData>> {
+    pub fn verify(
+        &self,
+        verification_type: &str,
+        private_data: &PrivateData,
+    ) -> Result<Vec<JsonData>> {
+        match verification_type {
+            "AES_DECRYPTION" => {
+                let Some(aes_key) = &private_data.aes_key else {
+                    return Err(anyhow::anyhow!("aes key is empty"));
+                };
+                self.verify_aes(aes_key)
+            }
+            _ => {
+                return Err(anyhow::anyhow!(
+                    "unsupported verification type: {}",
+                    verification_type
+                ))
+            }
+        }
+    }
+
+    // implement verify interface for TLSDataOpt
+    pub fn verify_aes(&self, aes_key: &str) -> Result<Vec<JsonData>> {
         let mut result = vec![];
         let cipher = Aes128Encryptor::from_hex(aes_key)?;
 
@@ -170,6 +217,7 @@ impl TLSDataOpt {
 // `PartialTLSData` definitions
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PartialTLSData {
+    pub verification_type: String, // verification type
     pub tls_data: TLSDataOpt,      // tls data opt
     pub private_data: PrivateData, // private data, including aes key
 }
@@ -177,6 +225,7 @@ pub struct PartialTLSData {
 // `PartialTLSData` implementations
 impl PartialTLSData {
     pub fn verify(&self) -> Result<Vec<JsonData>> {
-        self.tls_data.verify(&self.private_data.aes_key)
+        self.tls_data
+            .verify(&self.verification_type, &self.private_data)
     }
 }

@@ -1,4 +1,5 @@
 {
+    "verification_type": "AES_DECRYPTION",
     "tls_data" :{
         "packets":[
             {
