@@ -178,7 +178,7 @@ impl Attestation {
                     return Err(anyhow::anyhow!("unknown data {}", self.data));
                 }
             }
-            VerificationType::HashComparsion(_) => {
+            VerificationType::HashComparsion(_) | VerificationType::SalttedHashComparsion(_) => {
                 let tls_data_hash = TLSDataHash::from_str(&self.data)?;
                 tls_data_hash.verify(verification_type)?
             }

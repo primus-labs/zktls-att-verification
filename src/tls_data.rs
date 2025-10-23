@@ -1,5 +1,5 @@
 use crate::aes_utils::{Aes128Encryptor, BlockInfo};
-use crate::sha_utils::sha256;
+use crate::sha_utils::{sha256, sha256_with_salt};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -40,6 +40,7 @@ impl JsonData {
 pub enum VerificationType {
     AESDecryption(String),
     HashComparsion(Vec<PlainJsonResponse>),
+    SalttedHashComparsion(Vec<PlainJsonResponseWithSalt>),
 }
 
 impl VerificationType {
@@ -57,6 +58,16 @@ impl VerificationType {
                 };
                 Ok(VerificationType::HashComparsion(
                     plain_json_response.clone(),
+                ))
+            }
+            "SALTTED_HASH_COMPARSION" => {
+                let Some(plain_json_response_with_salt) =
+                    &private_data.plain_json_response_with_salt
+                else {
+                    return Err(anyhow::anyhow!("plain json response with salt is empty"));
+                };
+                Ok(VerificationType::SalttedHashComparsion(
+                    plain_json_response_with_salt.clone(),
                 ))
             }
             _ => Err(anyhow::anyhow!(
@@ -146,11 +157,19 @@ pub struct PlainJsonResponse {
     pub content: String,
 }
 
+// `PlainJsonResponseWithSalt` definition
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PlainJsonResponseWithSalt {
+    pub id: String,
+    pub salt: String,
+    pub content: String,
+}
 // `PrivateData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PrivateData {
     pub aes_key: Option<String>,                             // aes key
     pub plain_json_response: Option<Vec<PlainJsonResponse>>, // plain json response
+    pub plain_json_response_with_salt: Option<Vec<PlainJsonResponseWithSalt>>, // plain json response with salt
 }
 
 // `FullTLSData` definitions
@@ -267,28 +286,53 @@ impl FromStr for TLSDataHash {
 impl TLSDataHash {
     pub fn verify(&self, verification_type: &VerificationType) -> Result<Vec<JsonData>> {
         let mut vec = vec![];
-        let VerificationType::HashComparsion(plain_json_response) = verification_type else {
-            return Err(anyhow::anyhow!("empty plain json response"));
-        };
-        for response in plain_json_response.iter() {
-            let expected_hash = sha256(&response.content);
-            let committed_hash = match self.hashes.get(&response.id) {
-                Some(hash) => {
-                    let hash = hash.to_string();
-                    let hash = hash.trim_matches('"');
+        match verification_type {
+            VerificationType::HashComparsion(plain_json_response) => {
+                for response in plain_json_response.iter() {
+                    let expected_hash = sha256(&response.content);
+                    let committed_hash = match self.hashes.get(&response.id) {
+                        Some(hash) => {
+                            let hash = hash.to_string();
+                            let hash = hash.trim_matches('"');
 
-                    let h = hash.strip_prefix("0x").unwrap_or(&hash);
-                    hex::decode(&h)?
+                            let h = hash.strip_prefix("0x").unwrap_or(&hash);
+                            hex::decode(&h)?
+                        }
+                        None => return Err(anyhow::anyhow!("hash not find by {}", response.id)),
+                    };
+                    if expected_hash != committed_hash {
+                        return Err(anyhow::anyhow!("check json response hash failed"));
+                    }
+
+                    let json_data: JsonData = JsonData::from_str(&response.content)?;
+                    vec.push(json_data);
                 }
-                None => return Err(anyhow::anyhow!("hash not find by {}", response.id)),
-            };
-            if expected_hash != committed_hash {
-                return Err(anyhow::anyhow!("check json response hash failed"));
             }
+            VerificationType::SalttedHashComparsion(plain_json_response) => {
+                for response in plain_json_response.iter() {
+                    let expected_hash = sha256_with_salt(&response.content, &response.salt)?;
+                    let committed_hash = match self.hashes.get(&response.id) {
+                        Some(hash) => {
+                            let hash = hash.to_string();
+                            let hash = hash.trim_matches('"');
 
-            let json_data: JsonData = JsonData::from_str(&response.content)?;
-            vec.push(json_data);
-        }
+                            let h = hash.strip_prefix("0x").unwrap_or(&hash);
+                            hex::decode(&h)?
+                        }
+                        None => return Err(anyhow::anyhow!("hash not find by {}", response.id)),
+                    };
+                    if expected_hash != committed_hash {
+                        return Err(anyhow::anyhow!("check json response hash failed"));
+                    }
+
+                    let json_data: JsonData = JsonData::from_str(&response.content)?;
+                    vec.push(json_data);
+                }
+            }
+            _ => {
+                return Err(anyhow::anyhow!("unsupported verification type"));
+            }
+        };
         Ok(vec)
     }
 }

@@ -52,3 +52,7 @@ path = "examples/partial_attestation_example.rs"
 [[example]]
 name = "attestation_hash_example"
 path = "examples/attestation_hash_example.rs"
+
+[[example]]
+name = "attestation_hash_with_salt_example"
+path = "examples/attestation_hash_with_salt_example.rs"
