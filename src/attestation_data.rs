@@ -147,7 +147,7 @@ impl Attestation {
 
         let signer_addr = signer_addr.strip_prefix("0x").unwrap_or(signer_addr);
         let signer_addr = hex::decode(signer_addr)?;
-        if signer_addr == address {
+        if signer_addr != address {
             return Ok(());
         }
 
@@ -179,6 +179,10 @@ impl Attestation {
                 }
             }
             VerificationType::HashComparsion(_) | VerificationType::SalttedHashComparsion(_) => {
+                let tls_data_hash = TLSDataHash::from_str(&self.data)?;
+                tls_data_hash.verify(verification_type)?
+            }
+            VerificationType::CommitmentComparsion(_) => {
                 let tls_data_hash = TLSDataHash::from_str(&self.data)?;
                 tls_data_hash.verify(verification_type)?
             }
