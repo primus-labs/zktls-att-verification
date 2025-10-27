@@ -73,7 +73,7 @@ pub fn split_json_response(json_response: &String, batch_size: usize) -> Vec<Sec
 
     let chunk_len = (bits.len() + batch_size - 1) / batch_size;
     let mut index = 0usize;
-    for i in 0..chunk_len {
+    for _ in 0..chunk_len {
         let mut sk = BigUint::from_bytes_be(&[0u8; 32]);
         for j in 0..batch_size {
             if bits[index] {

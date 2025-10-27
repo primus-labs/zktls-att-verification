@@ -300,6 +300,7 @@ impl PartialTLSData {
 
 // 'CommitmentParam` definition
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct CommitmentParam {
     pub H: String,
     pub batch_size: usize,
