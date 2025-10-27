@@ -1,11 +1,12 @@
 use crate::aes_utils::{Aes128Encryptor, BlockInfo};
+use crate::secp256k1_utils;
 use crate::sha_utils::{sha256, sha256_with_salt};
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
-use std::str::FromStr;
-use secp256k1::{PublicKey, SecretKey};
 use num_bigint::BigUint;
 use num_traits::Num;
+use secp256k1::{PublicKey, Scalar, Secp256k1, SecretKey};
+use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 // `serde_json::Value` wrapper
 #[derive(Debug, Serialize, Deserialize)]
@@ -301,101 +302,6 @@ pub struct CommitmentParam {
     pub curve: String,
 }
 
-fn add_secret_keys(a: &BigUint, b: &SecretKey) -> BigUint {
-    let n = BigUint::from_str_radix("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16).unwrap();
-    // let a_int = BigUint::from_bytes_be(&a.secret_bytes());
-    let a_int = a.clone();
-    let b_int = BigUint::from_bytes_be(&b.secret_bytes());
-
-    let c = (a_int + b_int) % &n;
-
-    let mut bytes = c.to_bytes_be();
-    if bytes.len() < 32 {
-        let mut padded = vec![0u8; 32 - bytes.len()];
-        padded.extend_from_slice(&bytes);
-        bytes = padded;
-    }
-    // SecretKey::from_slice(&bytes).unwrap()
-    BigUint::from_bytes_be(&bytes)
-}
-
-fn biguint_to_key(c: BigUint) -> SecretKey {
-    let mut bytes = c.to_bytes_be();
-    if bytes.len() < 32 {
-        let mut padded = vec![0u8; 32 - bytes.len()];
-        padded.extend_from_slice(&bytes);
-        bytes = padded;
-    }
-    SecretKey::from_slice(&bytes).unwrap()
-}
-
-fn convert_random(random: &Vec<String>) -> Vec<SecretKey> {
-    let mut vec = vec![];
-    for rnd in random.iter() {
-        let bytes = hex::decode(rnd).unwrap();
-        vec.push(SecretKey::from_slice(&bytes).unwrap());
-    }
-    vec
-}
-
-fn convert_commitment(coms: &Vec<String>) -> Vec<PublicKey> {
-    let mut vec = vec![];
-    for com in coms.iter() {
-        let bytes = hex::decode(com).unwrap();
-        vec.push(PublicKey::from_slice(&bytes).unwrap());
-    }
-    vec
-}
-
-fn generate_exp(batch_size: usize) -> Vec<SecretKey> {
-    let mut vec = vec![];
-    for i in 0..batch_size {
-        let j = i / 8;
-        let k = i % 8;
-        let mut bytes = [0u8; 32];
-        bytes[31 - j] |= 1u8 << k;
-
-        let sk = SecretKey::from_slice(&bytes).unwrap();
-        vec.push(sk);
-    }
-    vec
-}
-
-fn split_json_response(json_response: &String, batch_size: usize) -> Vec<SecretKey> {
-    let mut vec = vec![];
-    let mut bytes = json_response.as_bytes().to_vec();
-    bytes.reverse();
-    let mut bits = vec![];
-    for byte in bytes.iter() {
-        for i in 0..8 {
-            let b = (byte >> i) & 1u8;
-            bits.push(b != 0u8);
-        }
-    }
-
-    let exp = generate_exp(batch_size);
-
-    let chunk_len = (bits.len() + batch_size - 1) / batch_size;
-    let mut index = 0usize;
-    for i in 0..chunk_len {
-        // let mut sk = SecretKey::from_slice(&[0u8; 32]).unwrap();
-        let mut sk = BigUint::from_bytes_be(&[0u8; 32]);
-        for j in 0..batch_size {
-            if bits[index] {
-                // TODO
-                // sk.add_assign(&exp[j].secret_bytes()).unwrap();
-                sk = add_secret_keys(&sk, &exp[j]);
-            }
-            index += 1;
-            if index >= bits.len() {
-                break;
-            }
-        }
-        let sk = biguint_to_key(sk);
-        vec.push(sk);
-    }
-    vec
-}
 // `TLSDataHash`definitions
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TLSDataHash {
@@ -471,19 +377,23 @@ impl TLSDataHash {
                     match &params.curve[..] {
                         "SECP256K1" => {
                             let h_bytes = hex::decode(&params.H)?;
-                            let h = secp256k1::PublicKey::from_slice(&h_bytes)?;
+                            let h = PublicKey::from_slice(&h_bytes)?;
                             let batch_size = params.batch_size;
-                            let msgs: Vec<secp256k1::SecretKey> = split_json_response(&response.content, batch_size);
-                            let rnds: Vec<secp256k1::SecretKey> = convert_random(&response.random);
-                            let coms: Vec<secp256k1::PublicKey> = convert_commitment(&coms);
-                            let msg_rnd_com: Vec<((SecretKey, SecretKey), PublicKey)> = msgs.into_iter().zip(rnds.into_iter()).zip(coms.into_iter()).collect();
+                            let msgs: Vec<SecretKey> =
+                                secp256k1_utils::split_json_response(&response.content, batch_size);
+                            let rnds: Vec<Scalar> =
+                                secp256k1_utils::convert_random(&response.random);
+                            let coms: Vec<PublicKey> = secp256k1_utils::convert_commitment(&coms);
+                            let msg_rnd_com: Vec<((SecretKey, Scalar), PublicKey)> = msgs
+                                .into_iter()
+                                .zip(rnds.into_iter())
+                                .zip(coms.into_iter())
+                                .collect();
 
-                            let secp = secp256k1::Secp256k1::new();
+                            let secp = Secp256k1::new();
                             for ((msg, rnd), com) in msg_rnd_com.into_iter() {
                                 let m_g = PublicKey::from_secret_key(&secp, &msg);
-                                let mut r_h = h.clone();
-                                // TODO
-                                // r_h.mul_assign(&rnd).unwrap();
+                                let r_h = h.mul_tweak(&secp, &rnd).unwrap();
                                 let expected_com = m_g.combine(&r_h).unwrap();
                                 if expected_com != com {
                                     return Err(anyhow::anyhow!("check commitment failed"));
