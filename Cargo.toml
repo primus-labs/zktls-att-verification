@@ -15,6 +15,10 @@ tiny-keccak = {version = "2.0", features=["sha3", "keccak"]}
 secp256k1 = {git = "https://github.com/brevis-network/rust-secp256k1.git", branch = "patch-v1.0.1", features=["recovery", "global-context", "rand-std"]}
 num-bigint = "0.4"
 num-traits = "0.2"
+ark-grumpkin = "0.5"
+ark-ec = "0.5"
+ark-ff = "0.5"
+ark-serialize = "0.5"
 
 sha2 = "0.10.8"
 structopt = {version = "0.3", optional =  true}
@@ -62,3 +66,7 @@ path = "examples/attestation_hash_with_salt_example.rs"
 [[example]]
 name = "attestation_secp256k1"
 path = "examples/attestation_secp256k1.rs"
+
+[[example]]
+name = "attestation_grumpkin"
+path = "examples/attestation_grumpkin.rs"

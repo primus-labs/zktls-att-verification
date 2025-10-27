@@ -1,11 +1,15 @@
 use crate::aes_utils::{Aes128Encryptor, BlockInfo};
+use crate::grumpkin_utils;
 use crate::secp256k1_utils;
 use crate::sha_utils::{sha256, sha256_with_salt};
 use anyhow::Result;
+use ark_ec::PrimeGroup;
+use ark_grumpkin::{Fr, Projective};
 use num_bigint::BigUint;
 use num_traits::Num;
 use secp256k1::{PublicKey, Scalar, Secp256k1, SecretKey};
 use serde::{Deserialize, Serialize};
+use std::ops::Mul;
 use std::str::FromStr;
 
 // `serde_json::Value` wrapper
@@ -374,11 +378,11 @@ impl TLSDataHash {
                         return Err(anyhow::anyhow!("commitment not found"));
                     };
                     let coms: Vec<String> = serde_json::from_str(coms.as_str().unwrap())?;
+                    let batch_size = params.batch_size;
                     match &params.curve[..] {
                         "SECP256K1" => {
                             let h_bytes = hex::decode(&params.H)?;
                             let h = PublicKey::from_slice(&h_bytes)?;
-                            let batch_size = params.batch_size;
                             let msgs: Vec<SecretKey> =
                                 secp256k1_utils::split_json_response(&response.content, batch_size);
                             let rnds: Vec<Scalar> =
@@ -396,6 +400,27 @@ impl TLSDataHash {
                                 let r_h = h.mul_tweak(&secp, &rnd).unwrap();
                                 let expected_com = m_g.combine(&r_h).unwrap();
                                 if expected_com != com {
+                                    return Err(anyhow::anyhow!("check commitment failed"));
+                                }
+                            }
+                        }
+                        "GRUMPKIN" => {
+                            let msgs =
+                                grumpkin_utils::split_json_response(&response.content, batch_size)?;
+                            let rnds = grumpkin_utils::convert_random(&response.random)?;
+                            let coms = grumpkin_utils::convert_commitment(&coms)?;
+                            let msg_rnd_com: Vec<((Fr, Fr), Projective)> = msgs
+                                .into_iter()
+                                .zip(rnds.into_iter())
+                                .zip(coms.into_iter())
+                                .collect();
+                            let g = Projective::generator();
+                            let h = grumpkin_utils::hex2point(&params.H)?;
+                            for ((msg, rnd), com) in msg_rnd_com.iter() {
+                                let m_g = g.mul(msg);
+                                let r_h = h.mul(rnd);
+                                let expected_com = m_g + r_h;
+                                if &expected_com != com {
                                     return Err(anyhow::anyhow!("check commitment failed"));
                                 }
                             }

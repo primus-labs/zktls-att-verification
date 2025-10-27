@@ -1,0 +1,48 @@
+{
+  "verification_type": "COMMITMENT_COMPARSION",
+  "public_data": [
+    {
+      "attestation": {
+        "recipient": "0x810b7bacEfD5ba495bB688bbFD2501C904036AB7",
+        "request": [
+          {
+            "url": "https://www.okx.com/api/v5/public/instruments?instType=SPOT&instId=ETH-USD",
+            "header": "",
+            "method": "GET",
+            "body": ""
+          }
+        ],
+        "responseResolves": [
+          {
+            "oneUrlResponseResolve": [
+              {
+                "keyName": "#reveal_id",
+                "parseType": "",
+                "parsePath": "$"
+              }
+            ]
+          }
+        ],
+"data": "{\"#reveal_id\": \"[\\\"042d9c55c9ce8ea243bcfab82ebb539ecc3dfeac8a77389829f741202b085a52211e877b96e08dbee9e3bc54b99c4b1290d5e6e543671cb9a1a5eeb70dea2c026f\\\",\\\"042d2f3c62cb36e5b0728c9b0a0c7edb05dad28fd5b3efc7ded56a493e1004b4b10b2df0fa4f57dd6d9b69be78b57e8af2a4cca0873b32127157e89f923c4b410f\\\",\\\"04028e6c4b4c9cf714344ba1c9f4e50f904b15d5df5a32dc0d4931cb0d50efc591277732fd10b6d12f13f6cacdcc226f08819a984de92fc9c9dec38923591d785e\\\",\\\"0412ccda61012f38d2fa31873ce989ddee06687baff034c768fd9e155e5c05aea309ac2ecbbba975ba9cb314169e920de9f4449e4eb3390acd45b3c704be100595\\\",\\\"0410607c542534ed6973b13bd93842215bafb7adf55f7009a123d84eb01a0aa1fd0b4c8f88922b58957714dda29705f89bd647bb7cd326af057fbde263870b4f0c\\\",\\\"0428de421d33709e64096d3e43dc3613d6e1be0843d16d93f7e8c40e57f846b27727982045061c2ef5dfefb04e72e34028f844238ffd026eb35be6bf8da8164a3e\\\"]\", \"#reveal_id.count\": \"6\", \"#reveal_id.params\": \"{\\\"H\\\":\\\"0401a2bc97f61dd31cecdb10dd7d31d189d25983ef59d629206704cbe87357e8d41561a96941aa2393c775b158ee1382bacfc008482cedc9248e39d7be5bffcca7\\\",\\\"batch_size\\\":253,\\\"curve\\\":\\\"GRUMPKIN\\\"}\", \"#reveal_id.params.count\": \"1\"}",
+        "attConditions": "[{\"op\":\"SHA256\",\"field\":\"$\"},{\"op\":\"SHA256\",\"field\":\"$\"}]",
+        "timestamp": 1761097404246,
+        "additionParams": "{\"algorithmType\":\"mpctls\"}"
+      },
+      "attestor": "0x22e1dbbcb3dacdbf7e1ff44cf15ecaf24f5bd6ee",
+      "signature": "0x19c1ab8e0272865a28208dc821bcb5246a1c4f7a5c90e50b9f69036fe47919167a492ab796f5864c85529b11a3afc460eb1b588bb99e25854e164cdc47078db91b",
+      "reportTxHash": "0x50a16f30b77c11a32b43be79cd4585bedd29ad10d11c50a3753367db17ea569e",
+      "taskId": "0xb07b7a633cce3a4f811eb200d750eb9029c6d82fecc8887d18c7c741410d1d0c",
+      "attestationTime": 34586,
+      "attestorUrl": "6f5a4e590245bc06cf7fd0334939615ec300cf8b-18080.dstack-base-prod7.phala.network"
+    }
+  ],
+  "private_data": {
+    "plain_json_response_with_random": [
+      {
+          "id": "#reveal_id",
+"content": "{\"limitOrder\":false,\"marketOrder\":false,\"stopLossOrder\":true,\"marginAutoBorrow\":true,\"marginAutoRepay\":true,\"oco\":false,\"autoBorrowRepay\":true,\"trailingStopOrder\":true}",
+"random": ["10ad3fed933f86a85b77450b386af1602f49ff574be079a752477e9557dd7304", "1504bbadd99106d891474c9265353509909204fca007456dab6ae8e123b3616b", "136cffd7e9c9fc5cbfac5b97095b5e3436360883dce18707aa82a0acf6a11884", "2ebc0ab495aa9e543827fbe6dc500a25c5148d99f7d550d54ecdf33bb4fac55a", "0d3d90f1d871a91e5893c5ca837e94f63fa31c453d892966181d9204349ceed7", "155eaf72c20e823faad4f7a998bcbab59ed45aa766c287d084e5f9d424fc98ed"]
+      }
+    ]
+  }
+}
