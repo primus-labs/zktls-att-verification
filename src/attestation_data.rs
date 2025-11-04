@@ -1,5 +1,5 @@
 use crate::ecdsa_utils::{encode_packed_address, encode_packed_u64, keccak256, ECDSASignature};
-use crate::tls_data::{JsonData, PrivateData, TLSData, TLSDataHash, TLSDataOpt, VerificationType};
+use crate::tls_data::{JsonData, PrivateData, TLSData, TLSDataHash, VerificationType};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -156,10 +156,10 @@ impl Attestation {
 
     // verify aes ciphertext: decrypt aes ciphertext
     // and check whether it is a valid json string
-    fn verify_tls_data(&self, verification_type: &VerificationType) -> Result<Vec<JsonData>> {
+    fn verify_tls_data(&self, verification_type: &VerificationType) -> Result<JsonData> {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
-        let json_data_vec: Vec<JsonData> = match verification_type {
-            VerificationType::AESDecryption(_) => {
+        let json_data: JsonData = match verification_type {
+            VerificationType::AESDecryption(id, _) => {
                 if json_value.get("CompleteHttpResponseCiphertext").is_some() {
                     let data = &json_value["CompleteHttpResponseCiphertext"];
                     let data = data
@@ -172,23 +172,29 @@ impl Attestation {
                     let data = data
                         .as_str()
                         .ok_or(anyhow!("parse PartialHttpResponseCiphertext error"))?;
-                    let tls_data_opt: TLSDataOpt = serde_json::from_str(data)?;
-                    tls_data_opt.verify(verification_type)?
+                    let tls_data: TLSData = serde_json::from_str(data)?;
+                    tls_data.verify(verification_type)?
+                } else if json_value.get(id).is_some() {
+                    let data = &json_value[id];
+                    let data = data.as_str().ok_or(anyhow!("parse {}", id))?;
+                    let tls_data: TLSData = serde_json::from_str(data)?;
+                    tls_data.verify(verification_type)?
                 } else {
                     return Err(anyhow::anyhow!("unknown data {}", self.data));
                 }
             }
-            VerificationType::HashComparsion(_) | VerificationType::SalttedHashComparsion(_) => {
+            VerificationType::HashComparsion(_, _)
+            | VerificationType::SalttedHashComparsion(_, _, _) => {
                 let tls_data_hash = TLSDataHash::from_str(&self.data)?;
                 tls_data_hash.verify(verification_type)?
             }
-            VerificationType::CommitmentComparsion(_) => {
+            VerificationType::CommitmentComparsion(_, _, _) => {
                 let tls_data_hash = TLSDataHash::from_str(&self.data)?;
                 tls_data_hash.verify(verification_type)?
             }
         };
 
-        Ok(json_data_vec)
+        Ok(json_data)
     }
 
     // check whether the attestation url is in the allowed url list
@@ -214,7 +220,7 @@ impl Attestation {
         config: &AttestationConfig,
         verification_type: &VerificationType,
         signature: &str,
-    ) -> Result<Vec<JsonData>> {
+    ) -> Result<JsonData> {
         self.verify_url(&config.url)?;
         self.verify_signature(&config.attestor_addr, signature)?;
         self.verify_tls_data(verification_type)
@@ -241,7 +247,7 @@ impl PublicData {
         &self,
         config: &AttestationConfig,
         verification_type: &VerificationType,
-    ) -> Result<Vec<JsonData>> {
+    ) -> Result<JsonData> {
         self.attestation
             .verify(config, verification_type, &self.signature)
     }
@@ -250,21 +256,24 @@ impl PublicData {
 // `AttestationData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AttestationData {
-    pub verification_type: String,    // verification type
-    pub public_data: Vec<PublicData>, // public data
-    pub private_data: PrivateData,    // private data, including aes key
+    pub verification_type: Vec<String>, // verification type
+    pub public_data: Vec<PublicData>,   // public data
+    pub private_data: Vec<PrivateData>, // private data, including aes key
 }
 
 // `AttestiongData`` implementations
 impl AttestationData {
     // verify the attestation
-    pub fn verify(&self, config: &AttestationConfig) -> Result<Vec<Vec<JsonData>>> {
+    pub fn verify(&self, config: &AttestationConfig) -> Result<Vec<JsonData>> {
         let mut vec = vec![];
-        let verification_type = VerificationType::new(&self.verification_type, &self.private_data)?;
-        for data in self.public_data.iter() {
-            let json_data = data.verify(config, &verification_type)?;
+        let verification_private = self.verification_type.iter().zip(self.private_data.iter());
+
+        for (verification_type, private_data) in verification_private.into_iter() {
+            let item = VerificationType::new(verification_type, private_data)?;
+            let json_data = self.public_data[0].verify(config, &item)?;
             vec.push(json_data);
         }
+
         Ok(vec)
     }
 }
@@ -279,7 +288,7 @@ pub struct AttestationConfig {
 pub fn verify_attestation_data(
     data: &str,
     config: &str,
-) -> Result<(AttestationData, AttestationConfig, Vec<Vec<JsonData>>)> {
+) -> Result<(AttestationData, AttestationConfig, Vec<JsonData>)> {
     let attestation_data: AttestationData = serde_json::from_str(data)?;
     let attestation_config: AttestationConfig = serde_json::from_str(config)?;
     // verify attestation data according to attestation config

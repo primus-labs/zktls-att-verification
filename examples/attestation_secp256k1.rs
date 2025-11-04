@@ -17,8 +17,8 @@ fn main() -> Result<()> {
     json_paths.push("$.data[*].baseCcy");
     json_paths.push("$.data[*].instIdCode");
 
-    for i in 0..messages[0].len() {
-        let json_value = messages[0][i].get_json_values(&json_paths);
+    for i in 0..messages.len() {
+        let json_value = messages[i].get_json_values(&json_paths);
         println!("json value:{:?}", json_value);
     }
 
