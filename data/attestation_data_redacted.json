@@ -1,5 +1,5 @@
 {
-    "verification_type": ["AES_DECRYPTION", "HASH_COMPARSION", "SALTTED_HASH_COMPARSION", "COMMITMENT_COMPARSION", "COMMITMENT_COMPARSION"],
+    "verification_type": ["AES_DECRYPTION", "HASH_COMPARSION", "SALTTED_HASH_COMPARSION", "SECP256K1_COMMITMENT", "GRUMPKIN_COMMITMENT"],
     "public_data": [
         {
             "attestation": {

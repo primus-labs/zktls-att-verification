@@ -1,5 +1,5 @@
 {
-  "verification_type": ["COMMITMENT_COMPARSION"],
+  "verification_type": ["SECP256K1_COMMITMENT"],
   "public_data": [
     {
       "attestation": {
@@ -23,7 +23,7 @@
             ]
           }
         ],
-"data": "{\"#reveal_id\": \"[\\\"04c8d4e8dcb61dabbd35de3e2f3d07bdb2d1861b4ddde9bf4e799a6d6ec2b61eaa8d9d16922d9a70db63dcb1c58c0a9cf8ad5160bb814f032af3e6836f6be3cd38\\\",\\\"045f46d5e9c4af2e000a9800a9a41bebe33de960454842d353e8dad0a8e60e7382e322942a75d70588b0baefd9851c79ced257141ca374dcea54be790eec7f5f79\\\",\\\"04ffdfd89a225897bef262e7f2a1d745302b0fa76621b4434aa0ad4df3f87115002bec9f5f565be1cd811c69fc435d1fb083ea43b40672875c61b53d1ce60adc1f\\\",\\\"04ef103a49085c9ffb20cfff268ac5cfa67a61c79c761d5e7d452fd462596d7df239bcf288217a3714b8cbf0c8a342835b666e9abe833508fd1b20e2b4e64a33ff\\\",\\\"042710caf4888e27decaa3d63bd3eafea60326660fcff9edc9db7a3883d8e035464fe7614f0d3e527de20533cedd8b54754e2ace05bec5dd7c542e912b4bd44cd4\\\",\\\"042accd3008308c7031860211336cd91e41663c6461fe0b3a7dd1836504dec4b11daef9f750b233a801b9b1e3a9bd21dc44a2ad195aaf79423bc87acfc67da3df5\\\"]\", \"#reveal_id.count\": \"6\", \"#reveal_id.params\": \"{\\\"H\\\":\\\"0457dd4936ba60d2d1d79b4a87426d7b79304e38fe083cf5d1c51ed5ca47f5ada530896eee54fa2c16dd84f0c2da911f0bbfd90ad944dfc9542c851dd4ae037072\\\",\\\"batch_size\\\":255,\\\"curve\\\":\\\"SECP256K1\\\"}\", \"#reveal_id.params.count\": \"1\"}",
+"data": "{\"#reveal_id\": \"{\\\"limitOrder\\\":false,\\\"marketOrder\\\":false,\\\"stopLossOrder\\\":true,\\\"marginAutoBorrow\\\":true,\\\"marginAutoRepay\\\":true,\\\"oco\\\":false,\\\"autoBorrowRepay\\\":true,\\\"trailingStopOrder\\\":true}\", \"#verification_id\": \"[\\\"04bd63f83fa3c66518a1d7399af7922b11816cc1bab415bdd4c9a1a4963d16c7469cafc8473c66503ab6093fe11fb86777fd7fd31de1999a76d2721244d51eb510\\\",\\\"04a8b4fe818068a1f9abce2a7eae9beba538ebd06fefda264c3e5731817016816ebd7bc8c0fc3a107f322cb347ccfb2121a1a37c2dcc9200ec3dd83e8a6c5cb773\\\",\\\"04545f943e44f3df3d6ead388355cfbd0d2f61120b1c974d3c4bee23ba1f567d1560fb0165d8f8a9ed635916ce4bbb4613ea2f412279dabdf67f433f37f0dd820e\\\",\\\"041bf070b93a7bdf02c99439919255227c9393ac6ea8739412c77f2241a0133ef5a4a20c4c52a45f35c8982e190bf146bff5826992270a042ce3e2155fde0b8c8e\\\",\\\"04e2377da7cb6001e714014cbc8c676b982aa4dce8596bcd4b2b49805a3ad889106e573493ab98ece9d5e81647443494290365254975758d0d430ed184bed4afa8\\\",\\\"0463a585d3021120e131e05d61da6690d379fe507a06d84cfcab797ccc651dfb3ea9c13e55369470ca199541519259fb090ffbc9d2041bdb4c08d3ce468fed39da\\\",\\\"04fd7dfed64216a512fe2f833e49c5619a5308f01b75b374d11a1e7f316f91bf5298686775301c9ffedf1ca1c9aa2c4be3fe4e4eb20f2cacf9778a830e3c672977\\\"]\"}",
         "attConditions": "[{\"op\":\"SHA256\",\"field\":\"$\"},{\"op\":\"SHA256\",\"field\":\"$\"}]",
         "timestamp": 1761097404246,
         "additionParams": "{\"algorithmType\":\"mpctls\"}"
@@ -36,11 +36,6 @@
       "attestorUrl": "6f5a4e590245bc06cf7fd0334939615ec300cf8b-18080.dstack-base-prod7.phala.network"
     }
   ],
-  "private_data": [
-      {
-          "id": "#reveal_id",
-"content": "{\"limitOrder\":false,\"marketOrder\":false,\"stopLossOrder\":true,\"marginAutoBorrow\":true,\"marginAutoRepay\":true,\"oco\":false,\"autoBorrowRepay\":true,\"trailingStopOrder\":true}",
-"random": ["269cdbab7989a5aa096c958c8ca0a3d7685f70bc9b890117c08ac4645d311464", "41e72325a4b2e063fd75584767fa0599d9a1f0698ef742a5b50885690f42648f", "4aeea2d3a05adb8d14f2f6b654f0e1c10246ac23e7e1d18d8bae813614a7b0c2", "a73cb65edf37de6cfe108de54f0e1ba0bd6a53dc4242b7dd9bcd47230e40729b", "adf5f8a8b9fdf408f185be8ef5a5ae2316c31b9e9323a070442aeb40c9bcb713", "ffae4164f8f73f62005249aa0d9e258e1e506867165258a91c91fd9bdf393a4a"]
-      }
-    ]
+  "private_data":
+[{"random": ["f37d698df0fb7a37ba3f395a1c986736af99e930c5ebd7693e218efae7795c8d", "cf9c2326dccb8e5001960f8e8d09f827585a593f0b15f1c78ad565643fe4117c", "bd6d31103d5a4b695f2a43bc27669a35e96ef57fb330ef17f83ec776d62cfe25", "bdb337d77c29e3eee356dd31cdf7c7c0c91328ccb04cb2402415f0e4796ac096", "583c042220144b8c0be886b661b87d6c51bc2b7ff92cc51d6037828c7d07d25a", "d10f8c95e76b05988c47291acf97693710a3997ea1f398d15c9c12182ada84fc", "b3d87cc42018e4e702204f4c304136b78aa5097452d265b031a358a0dedeb6e8"], "id": "#verification_id", "content": "{\"data\":{\"orderConfirmStatus\":{\"limitOrder\":false,\"marketOrder\":false,\"stopLossOrder\":true,\"marginAutoBorrow\":true,\"marginAutoRepay\":true,\"oco\":false,\"autoBorrowRepay\":true,\"trailingStopOrder\":true}}}"}]
 }
