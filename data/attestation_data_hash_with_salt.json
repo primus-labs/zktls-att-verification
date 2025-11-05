@@ -1,5 +1,5 @@
 {
-  "verification_type": "SALTTED_HASH_COMPARSION",
+  "verification_type": ["SALTTED_HASH_COMPARSION", "SALTTED_HASH_COMPARSION"],
   "public_data": [
     {
       "attestation": {
@@ -38,7 +38,7 @@
             ]
           }
         ],
-        "data": "{\"uuid-0\":\"6ba84bc1417c1d91f6c69467dbc3a96c741ff878e62a06cb4f876bad2cf4809c\",\"uuid-0.count\":\"1\",\"uuid-1\":\"3ef874d4392f9d7fd729f0bfce663eb8727000a1231e8bf739e087f73feb3316\",\"uuid-1.count\":\"1\",\"SHA256($)\":\"3ef874d4392f9d7fd729f0bfce663eb8727000a1231e8bf739e087f73feb3316\"}",
+        "data": "{\"uuid-0\":\"1c2b4169465d3f9b8a507e3c991b9a53470f32792ba08da71880c843ea673850\",\"uuid-0.count\":\"1\",\"uuid-1\":\"b31616dd1890d80da809afa8432249fc40bd3596e49149265797ef51f101e78c\",\"uuid-1.count\":\"1\",\"SHA256($)\":\"3ef874d4392f9d7fd729f0bfce663eb8727000a1231e8bf739e087f73feb3316\"}",
         "attConditions": "[{\"op\":\"SHA256\",\"field\":\"$\"},{\"op\":\"SHA256\",\"field\":\"$\"}]",
         "timestamp": 1761097404246,
         "additionParams": "{\"algorithmType\":\"mpctls\"}"
@@ -51,8 +51,7 @@
       "attestorUrl": "6f5a4e590245bc06cf7fd0334939615ec300cf8b-18080.dstack-base-prod7.phala.network"
     }
   ],
-  "private_data": {
-    "plain_json_response_with_salt": [
+  "private_data": [
       {
           "id": "uuid-0",
           "salt": "464f7b09b19119b53bddf356279349b9",
@@ -64,5 +63,4 @@
           "content": "{\"code\":\"0\",\"data\":[{\"alias\":\"\",\"auctionEndTime\":\"\",\"baseCcy\":\"ETH\",\"category\":\"1\",\"contTdSwTime\":\"\",\"ctMult\":\"\",\"ctType\":\"\",\"ctVal\":\"\",\"ctValCcy\":\"\",\"expTime\":\"\",\"futureSettlement\":false,\"instFamily\":\"\",\"instId\":\"ETH-USD\",\"instIdCode\":187183,\"instType\":\"SPOT\",\"lever\":\"\",\"listTime\":\"1733455800000\",\"lotSz\":\"0.000001\",\"maxIcebergSz\":\"999999999999.0000000000000000\",\"maxLmtAmt\":\"20000000\",\"maxLmtSz\":\"999999999999\",\"maxMktAmt\":\"740000\",\"maxMktSz\":\"1000000\",\"maxPlatOILmt\":\"\",\"maxStopSz\":\"1000000\",\"maxTriggerSz\":\"999999999999.0000000000000000\",\"maxTwapSz\":\"999999999999.0000000000000000\",\"minSz\":\"0.001\",\"openType\":\"fix_price\",\"optType\":\"\",\"posLmtAmt\":\"\",\"posLmtPct\":\"\",\"preMktSwTime\":\"\",\"quoteCcy\":\"USD\",\"ruleType\":\"normal\",\"settleCcy\":\"\",\"state\":\"live\",\"stk\":\"\",\"tickSz\":\"0.01\",\"tradeQuoteCcyList\":[\"USDG\",\"USD\",\"USDC\"],\"uly\":\"\"}],\"msg\":\"\"}"
       }
     ]
-  }
 }

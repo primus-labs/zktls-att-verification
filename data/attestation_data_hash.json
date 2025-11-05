@@ -1,5 +1,5 @@
 {
-  "verification_type": "HASH_COMPARSION",
+  "verification_type": ["HASH_COMPARSION", "HASH_COMPARSION"],
   "public_data": [
     {
       "attestation": {
@@ -51,8 +51,7 @@
       "attestorUrl": "6f5a4e590245bc06cf7fd0334939615ec300cf8b-18080.dstack-base-prod7.phala.network"
     }
   ],
-  "private_data": {
-    "plain_json_response": [
+  "private_data": [
       {
           "id": "uuid-0",
           "content": "{\"code\":\"0\",\"data\":[{\"alias\":\"\",\"auctionEndTime\":\"\",\"baseCcy\":\"BTC\",\"category\":\"1\",\"contTdSwTime\":\"\",\"ctMult\":\"\",\"ctType\":\"\",\"ctVal\":\"\",\"ctValCcy\":\"\",\"expTime\":\"\",\"futureSettlement\":false,\"instFamily\":\"\",\"instId\":\"BTC-USD\",\"instIdCode\":187360,\"instType\":\"SPOT\",\"lever\":\"\",\"listTime\":\"1733454000000\",\"lotSz\":\"0.00000001\",\"maxIcebergSz\":\"9999999999.0000000000000000\",\"maxLmtAmt\":\"20000000\",\"maxLmtSz\":\"9999999999\",\"maxMktAmt\":\"120000\",\"maxMktSz\":\"1000000\",\"maxPlatOILmt\":\"\",\"maxStopSz\":\"1000000\",\"maxTriggerSz\":\"9999999999.0000000000000000\",\"maxTwapSz\":\"9999999999.0000000000000000\",\"minSz\":\"0.0001\",\"openType\":\"fix_price\",\"optType\":\"\",\"posLmtAmt\":\"\",\"posLmtPct\":\"\",\"preMktSwTime\":\"\",\"quoteCcy\":\"USD\",\"ruleType\":\"normal\",\"settleCcy\":\"\",\"state\":\"live\",\"stk\":\"\",\"tickSz\":\"0.1\",\"tradeQuoteCcyList\":[\"USDG\",\"USD\",\"USDC\"],\"uly\":\"\"}],\"msg\":\"\"}"
@@ -62,5 +61,4 @@
           "content": "{\"code\":\"0\",\"data\":[{\"alias\":\"\",\"auctionEndTime\":\"\",\"baseCcy\":\"ETH\",\"category\":\"1\",\"contTdSwTime\":\"\",\"ctMult\":\"\",\"ctType\":\"\",\"ctVal\":\"\",\"ctValCcy\":\"\",\"expTime\":\"\",\"futureSettlement\":false,\"instFamily\":\"\",\"instId\":\"ETH-USD\",\"instIdCode\":187183,\"instType\":\"SPOT\",\"lever\":\"\",\"listTime\":\"1733455800000\",\"lotSz\":\"0.000001\",\"maxIcebergSz\":\"999999999999.0000000000000000\",\"maxLmtAmt\":\"20000000\",\"maxLmtSz\":\"999999999999\",\"maxMktAmt\":\"740000\",\"maxMktSz\":\"1000000\",\"maxPlatOILmt\":\"\",\"maxStopSz\":\"1000000\",\"maxTriggerSz\":\"999999999999.0000000000000000\",\"maxTwapSz\":\"999999999999.0000000000000000\",\"minSz\":\"0.001\",\"openType\":\"fix_price\",\"optType\":\"\",\"posLmtAmt\":\"\",\"posLmtPct\":\"\",\"preMktSwTime\":\"\",\"quoteCcy\":\"USD\",\"ruleType\":\"normal\",\"settleCcy\":\"\",\"state\":\"live\",\"stk\":\"\",\"tickSz\":\"0.01\",\"tradeQuoteCcyList\":[\"USDG\",\"USD\",\"USDC\"],\"uly\":\"\"}],\"msg\":\"\"}"
       }
     ]
-  }
 }

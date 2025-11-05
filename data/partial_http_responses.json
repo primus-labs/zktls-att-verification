@@ -1,8 +1,7 @@
 {
     "verification_type": "AES_DECRYPTION",
     "tls_data": {
-        "packets": [
-            {
+        "packet": {
                 "records": [
                     {
                         "ciphertext": "0593e9aee46dc2e030c5a0035cb7cb12ff704651c603690001dcda",
@@ -76,9 +75,9 @@
                     }
                 ]
             }
-        ]
     },
     "private_data": {
+        "id": "id1",
         "aes_key": "8ba6ec68f0b1cccccc242d49040db6f5"
     }
 }

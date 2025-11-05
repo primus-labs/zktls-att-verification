@@ -1,5 +1,5 @@
 {
-  "verification_type": "COMMITMENT_COMPARSION",
+  "verification_type": ["COMMITMENT_COMPARSION"],
   "public_data": [
     {
       "attestation": {
@@ -36,13 +36,11 @@
       "attestorUrl": "6f5a4e590245bc06cf7fd0334939615ec300cf8b-18080.dstack-base-prod7.phala.network"
     }
   ],
-  "private_data": {
-    "plain_json_response_with_random": [
+  "private_data": [
       {
           "id": "#reveal_id",
 "content": "{\"limitOrder\":false,\"marketOrder\":false,\"stopLossOrder\":true,\"marginAutoBorrow\":true,\"marginAutoRepay\":true,\"oco\":false,\"autoBorrowRepay\":true,\"trailingStopOrder\":true}",
 "random": ["269cdbab7989a5aa096c958c8ca0a3d7685f70bc9b890117c08ac4645d311464", "41e72325a4b2e063fd75584767fa0599d9a1f0698ef742a5b50885690f42648f", "4aeea2d3a05adb8d14f2f6b654f0e1c10246ac23e7e1d18d8bae813614a7b0c2", "a73cb65edf37de6cfe108de54f0e1ba0bd6a53dc4242b7dd9bcd47230e40729b", "adf5f8a8b9fdf408f185be8ef5a5ae2316c31b9e9323a070442aeb40c9bcb713", "ffae4164f8f73f62005249aa0d9e258e1e506867165258a91c91fd9bdf393a4a"]
       }
     ]
-  }
 }

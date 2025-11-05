@@ -1,0 +1,66 @@
+{
+    "verification_type": ["AES_DECRYPTION", "HASH_COMPARSION", "SALTTED_HASH_COMPARSION", "COMMITMENT_COMPARSION", "COMMITMENT_COMPARSION"],
+    "public_data": [
+        {
+            "attestation": {
+                "recipient": "0x810b7bacEfD5ba495bB688bbFD2501C904036AB7",
+                "request": [
+                    {
+                        "url": "https://www.okx.com/api/v5/public/instruments?instType=SPOT&instId=BTC-USD",
+                        "header": "",
+                        "method": "GET",
+                        "body": ""
+                    },
+                    {
+                        "url": "https://www.okx.com/api/v5/public/instruments?instType=SPOT&instId=ETH-USD",
+                        "header": "",
+                        "method": "GET",
+                        "body": ""
+                    }
+                ],
+                "responseResolves": [
+                    {
+                        "oneUrlResponseResolve": [
+                            {
+                                "keyName": "btc-ccy",
+                                "parseType": "",
+                                "parsePath": "$.data[*].baseCcy"
+                            },
+                            {
+                                "keyName": "btc-idCode",
+                                "parseType": "",
+                                "parsePath": "$.data[*].instIdCode"
+                            }
+                        ]
+                    },
+                    {
+                        "oneUrlResponseResolve": [
+                            {
+                                "keyName": "eth-ccy",
+                                "parseType": "",
+                                "parsePath": "$.data[*].baseCcy"
+                            },
+                            {
+                                "keyName": "eth-idCode",
+                                "parseType": "",
+                                "parsePath": "$.data[*].instIdCode"
+                            }
+                        ]
+                    }
+                ],
+"data": "{\"#aes_decryption\": \"{\\\"packet\\\":{\\\"records\\\":[{\\\"ciphertext\\\":\\\"83bce47fbadeb751fe13bbd3e9129f\\\",\\\"nonce\\\":\\\"12b1cfde65f4945ebb4f82ff\\\",\\\"blocks\\\":[{\\\"id\\\":5,\\\"mask\\\":[0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1]},{\\\"id\\\":6,\\\"mask\\\":[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}]},{\\\"ciphertext\\\":\\\"f4\\\",\\\"nonce\\\":\\\"12b1cfde65f4945ebb4f8300\\\",\\\"blocks\\\":[{\\\"id\\\":2,\\\"mask\\\":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}]},{\\\"ciphertext\\\":\\\"dd\\\",\\\"nonce\\\":\\\"12b1cfde65f4945ebb4f8301\\\",\\\"blocks\\\":[{\\\"id\\\":6,\\\"mask\\\":[0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0]}]}]}}\", \"#grumpkin\": \"[\\\"041c820655d1967426d66d09da715adc0dae3518c8d908aabe5231a46cffb32148131807aef58f382ee9b1d8e678cf69007976eb3d02aed0662d45cf1e1303a2d5\\\"]\", \"#grumpkin.params\": \"{\\\"H\\\":\\\"042c2b3f8b8ed443db8604f0bc915726d2fdcc477f376d1c296025f2c8abdfd0d71d3000a60e38d450723887a1ff33863efefc92fc7849a88343997f38b7c49338\\\",\\\"batch_size\\\":253,\\\"curve\\\":\\\"GRUMPKIN\\\"}\", \"#hash\": \"4547ca29eab5216bba3ad3a1d16bd970b6ee751d03cec90f13fb72eb95b2be77\", \"#hashsalt\": \"cfed73349766fa62db3ce38e3bbb8e67206c9453b086b5a77915fdc702b0da71\", \"#reveal_id\": \"BTC\", \"#secp256k1\": \"[\\\"04cef8f9b6d05b06c09ed5a8b2e6346963ecec39e7b7a002fc3c826d5530f727d2f3137d676d98fc2e405227bf744f4dcb6a1f351725fe15e5adb998084348842e\\\"]\", \"#secp256k1.params\": \"{\\\"H\\\":\\\"04bd582ae432692458aef5c1e015db2fea76680058a4996ddd2bcbd3847bdfd0da38a29b2d21557940272b71963cea0f09802283bf44034b63e8c14cee6a6e71aa\\\",\\\"batch_size\\\":255,\\\"curve\\\":\\\"SECP256K1\\\"}\"}",
+                "attConditions": "",
+                "timestamp": 1760582283810,
+                "additionParams": "{\"algorithmType\":\"proxytls\"}"
+            },
+            "attestor": "0x22e1dbbcb3dacdbf7e1ff44cf15ecaf24f5bd6ee",
+            "signature": "0xb4662f606dae66ed8af9f87de829d0fd57b333ba66b0e23bc2b0845d5d09aa87398f5ae18a6ee89e72f58312ecb68089576dfd6dc0d8b2b61c8ac47fcd9038be1b",
+            "reportTxHash": "0xd6e82eab0456c67f36b0352df69f9f9f64d0d1c2d025dc7b8c8fa54a81fcba23",
+            "taskId": "0x494ddaa4cd6299519d1af7a644ba3c957d663c6feff8db4548dccade1f14c26a",
+            "attestationTime": 8063,
+            "attestorUrl": "6f5a4e590245bc06cf7fd0334939615ec300cf8b-18080.dstack-base-prod7.phala.network"
+        }
+    ],
+    "private_data": 
+[{"id": "#aes_decryption", "aes_key": "72410932d076f628559d64cc425b8d06"}, {"id": "#hash", "content": "[{\"asset\":\"BTC\"}]"}, {"salt": "c856de83d7344025ab8db3c1710058d3", "id": "#hashsalt", "content": "[{\"asset\":\"BTC\"}]"}, {"random": ["1eb8fddda950f0b76583d4548be65f350409b8cb342bca76c89f9d7babe8aba1"], "id": "#secp256k1", "content": "[{\"asset\":\"BTC\"}]"}, {"random": ["0367dfab078ab896c6d024d22d1220d6c522ffe00b6cf050bdedfee838e4331b"], "id": "#grumpkin", "content": "[{\"asset\":\"BTC\"}]"}]
+}
