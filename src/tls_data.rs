@@ -12,6 +12,11 @@ use serde::{Deserialize, Serialize};
 use std::ops::Mul;
 use std::str::FromStr;
 
+const SECP256K1_BATCH_SIZE: usize = 255;
+const GRUMPKIN_BATCH_SIZE: usize = 253;
+const SECP256K1_H_POINT: &str = "04bd582ae432692458aef5c1e015db2fea76680058a4996ddd2bcbd3847bdfd0da38a29b2d21557940272b71963cea0f09802283bf44034b63e8c14cee6a6e71aa";
+const GRUMPKIN_H_POINT: &str = "042c2b3f8b8ed443db8604f0bc915726d2fdcc477f376d1c296025f2c8abdfd0d71d3000a60e38d450723887a1ff33863efefc92fc7849a88343997f38b7c49338";
+
 // `serde_json::Value` wrapper
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JsonData {
@@ -45,11 +50,17 @@ impl JsonData {
 }
 
 #[derive(Debug, Clone)]
+pub enum CurveType {
+    SECP256K1,
+    GRUMPKIN,
+}
+
+#[derive(Debug, Clone)]
 pub enum VerificationType {
     AESDecryption(String, String),
     HashComparsion(String, String),
     SalttedHashComparsion(String, String, String),
-    CommitmentComparsion(String, String, Vec<String>),
+    CommitmentComparsion(CurveType, String, String, Vec<String>),
 }
 
 impl VerificationType {
@@ -86,7 +97,7 @@ impl VerificationType {
                     salt.clone(),
                 ))
             }
-            "COMMITMENT_COMPARSION" => {
+            "SECP256K1_COMMITMENT" => {
                 let Some(content) = &private_data.content else {
                     return Err(anyhow::anyhow!("content is empty"));
                 };
@@ -94,6 +105,21 @@ impl VerificationType {
                     return Err(anyhow::anyhow!("random is empty"));
                 };
                 Ok(VerificationType::CommitmentComparsion(
+                    CurveType::SECP256K1,
+                    private_data.id.clone(),
+                    content.clone(),
+                    random.clone(),
+                ))
+            }
+            "GRUMPKIN_COMMITMENT" => {
+                let Some(content) = &private_data.content else {
+                    return Err(anyhow::anyhow!("content is empty"));
+                };
+                let Some(random) = &private_data.random else {
+                    return Err(anyhow::anyhow!("random is empty"));
+                };
+                Ok(VerificationType::CommitmentComparsion(
+                    CurveType::GRUMPKIN,
                     private_data.id.clone(),
                     content.clone(),
                     random.clone(),
@@ -254,15 +280,6 @@ impl FullTLSData {
     }
 }
 
-// 'CommitmentParam` definition
-#[derive(Debug, Serialize, Deserialize)]
-#[allow(non_snake_case)]
-pub struct CommitmentParam {
-    pub H: String,
-    pub batch_size: usize,
-    pub curve: String,
-}
-
 // `TLSDataHash`definitions
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TLSDataHash {
@@ -318,21 +335,18 @@ impl TLSDataHash {
                 let json_data: JsonData = JsonData::from_str(&content)?;
                 json_data
             }
-            VerificationType::CommitmentComparsion(id, content, random) => {
-                let param_id = format!("{}.params", id);
-                let Some(params) = self.hashes.get(&param_id) else {
-                    return Err(anyhow::anyhow!("commitment params not found"));
+            VerificationType::CommitmentComparsion(curve_type, id, content, random) => {
+                let (h_point, batch_size) = match curve_type {
+                    CurveType::SECP256K1 => (SECP256K1_H_POINT, SECP256K1_BATCH_SIZE),
+                    CurveType::GRUMPKIN => (GRUMPKIN_H_POINT, GRUMPKIN_BATCH_SIZE),
                 };
-                println!("{}", params.as_str().unwrap());
-                let params: CommitmentParam = serde_json::from_str(params.as_str().unwrap())?;
                 let Some(coms) = self.hashes.get(&id) else {
                     return Err(anyhow::anyhow!("commitment not found"));
                 };
                 let coms: Vec<String> = serde_json::from_str(coms.as_str().unwrap())?;
-                let batch_size = params.batch_size;
-                match &params.curve[..] {
-                    "SECP256K1" => {
-                        let h_bytes = hex::decode(&params.H)?;
+                match curve_type {
+                    CurveType::SECP256K1 => {
+                        let h_bytes = hex::decode(h_point)?;
                         let h = PublicKey::from_slice(&h_bytes)?;
                         let msgs: Vec<SecretKey> =
                             secp256k1_utils::split_json_response(&content, batch_size);
@@ -354,7 +368,7 @@ impl TLSDataHash {
                             }
                         }
                     }
-                    "GRUMPKIN" => {
+                    CurveType::GRUMPKIN => {
                         let msgs = grumpkin_utils::split_json_response(&content, batch_size)?;
                         let rnds = grumpkin_utils::convert_random(&random)?;
                         let coms = grumpkin_utils::convert_commitment(&coms)?;
@@ -364,7 +378,7 @@ impl TLSDataHash {
                             .zip(coms.into_iter())
                             .collect();
                         let g = Projective::generator();
-                        let h = grumpkin_utils::hex2point(&params.H)?;
+                        let h = grumpkin_utils::hex2point(h_point)?;
                         for ((msg, rnd), com) in msg_rnd_com.iter() {
                             let m_g = g.mul(msg);
                             let r_h = h.mul(rnd);
@@ -373,9 +387,6 @@ impl TLSDataHash {
                                 return Err(anyhow::anyhow!("check commitment failed"));
                             }
                         }
-                    }
-                    _ => {
-                        return Err(anyhow::anyhow!("unsupported curve {},", params.curve));
                     }
                 }
 

@@ -184,11 +184,8 @@ impl Attestation {
                 }
             }
             VerificationType::HashComparsion(_, _)
-            | VerificationType::SalttedHashComparsion(_, _, _) => {
-                let tls_data_hash = TLSDataHash::from_str(&self.data)?;
-                tls_data_hash.verify(verification_type)?
-            }
-            VerificationType::CommitmentComparsion(_, _, _) => {
+            | VerificationType::SalttedHashComparsion(_, _, _)
+            | VerificationType::CommitmentComparsion(_, _, _, _) => {
                 let tls_data_hash = TLSDataHash::from_str(&self.data)?;
                 tls_data_hash.verify(verification_type)?
             }
