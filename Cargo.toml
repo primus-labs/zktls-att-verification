@@ -72,6 +72,3 @@ path = "examples/attestation_secp256k1.rs"
 name = "attestation_grumpkin"
 path = "examples/attestation_grumpkin.rs"
 
-[[example]]
-name = "attestation_redacted"
-path = "examples/attestation_redacted.rs"

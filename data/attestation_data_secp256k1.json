@@ -1,41 +1,50 @@
 {
-  "verification_type": ["SECP256K1_COMMITMENT"],
-  "public_data": [
-    {
-      "attestation": {
-        "recipient": "0x810b7bacEfD5ba495bB688bbFD2501C904036AB7",
-        "request": [
-          {
-            "url": "https://www.okx.com/api/v5/public/instruments?instType=SPOT&instId=ETH-USD",
-            "header": "",
-            "method": "GET",
-            "body": ""
-          }
-        ],
-        "responseResolves": [
-          {
-            "oneUrlResponseResolve": [
-              {
-                "keyName": "#reveal_id",
-                "parseType": "",
-                "parsePath": "$"
-              }
-            ]
-          }
-        ],
-"data": "{\"#reveal_id\": \"{\\\"limitOrder\\\":false,\\\"marketOrder\\\":false,\\\"stopLossOrder\\\":true,\\\"marginAutoBorrow\\\":true,\\\"marginAutoRepay\\\":true,\\\"oco\\\":false,\\\"autoBorrowRepay\\\":true,\\\"trailingStopOrder\\\":true}\", \"#verification_id\": \"[\\\"04bd63f83fa3c66518a1d7399af7922b11816cc1bab415bdd4c9a1a4963d16c7469cafc8473c66503ab6093fe11fb86777fd7fd31de1999a76d2721244d51eb510\\\",\\\"04a8b4fe818068a1f9abce2a7eae9beba538ebd06fefda264c3e5731817016816ebd7bc8c0fc3a107f322cb347ccfb2121a1a37c2dcc9200ec3dd83e8a6c5cb773\\\",\\\"04545f943e44f3df3d6ead388355cfbd0d2f61120b1c974d3c4bee23ba1f567d1560fb0165d8f8a9ed635916ce4bbb4613ea2f412279dabdf67f433f37f0dd820e\\\",\\\"041bf070b93a7bdf02c99439919255227c9393ac6ea8739412c77f2241a0133ef5a4a20c4c52a45f35c8982e190bf146bff5826992270a042ce3e2155fde0b8c8e\\\",\\\"04e2377da7cb6001e714014cbc8c676b982aa4dce8596bcd4b2b49805a3ad889106e573493ab98ece9d5e81647443494290365254975758d0d430ed184bed4afa8\\\",\\\"0463a585d3021120e131e05d61da6690d379fe507a06d84cfcab797ccc651dfb3ea9c13e55369470ca199541519259fb090ffbc9d2041bdb4c08d3ce468fed39da\\\",\\\"04fd7dfed64216a512fe2f833e49c5619a5308f01b75b374d11a1e7f316f91bf5298686775301c9ffedf1ca1c9aa2c4be3fe4e4eb20f2cacf9778a830e3c672977\\\"]\"}",
-        "attConditions": "[{\"op\":\"SHA256\",\"field\":\"$\"},{\"op\":\"SHA256\",\"field\":\"$\"}]",
-        "timestamp": 1761097404246,
-        "additionParams": "{\"algorithmType\":\"mpctls\"}"
-      },
-      "attestor": "0x22e1dbbcb3dacdbf7e1ff44cf15ecaf24f5bd6ee",
-      "signature": "0x19c1ab8e0272865a28208dc821bcb5246a1c4f7a5c90e50b9f69036fe47919167a492ab796f5864c85529b11a3afc460eb1b588bb99e25854e164cdc47078db91b",
-      "reportTxHash": "0x50a16f30b77c11a32b43be79cd4585bedd29ad10d11c50a3753367db17ea569e",
-      "taskId": "0xb07b7a633cce3a4f811eb200d750eb9029c6d82fecc8887d18c7c741410d1d0c",
-      "attestationTime": 34586,
-      "attestorUrl": "6f5a4e590245bc06cf7fd0334939615ec300cf8b-18080.dstack-base-prod7.phala.network"
-    }
-  ],
-  "private_data":
-[{"random": ["f37d698df0fb7a37ba3f395a1c986736af99e930c5ebd7693e218efae7795c8d", "cf9c2326dccb8e5001960f8e8d09f827585a593f0b15f1c78ad565643fe4117c", "bd6d31103d5a4b695f2a43bc27669a35e96ef57fb330ef17f83ec776d62cfe25", "bdb337d77c29e3eee356dd31cdf7c7c0c91328ccb04cb2402415f0e4796ac096", "583c042220144b8c0be886b661b87d6c51bc2b7ff92cc51d6037828c7d07d25a", "d10f8c95e76b05988c47291acf97693710a3997ea1f398d15c9c12182ada84fc", "b3d87cc42018e4e702204f4c304136b78aa5097452d265b031a358a0dedeb6e8"], "id": "#verification_id", "content": "{\"data\":{\"orderConfirmStatus\":{\"limitOrder\":false,\"marketOrder\":false,\"stopLossOrder\":true,\"marginAutoBorrow\":true,\"marginAutoRepay\":true,\"oco\":false,\"autoBorrowRepay\":true,\"trailingStopOrder\":true}}}"}]
+    "verification_type": [
+        "SECP256K1_COMMITMENT"
+    ],
+    "public_data": [
+        {
+            "attestation": {
+                "recipient": "0x810b7bacEfD5ba495bB688bbFD2501C904036AB7",
+                "request": [
+                    {
+                        "url": "https://www.okx.com/api/v5/public/instruments?instType=SPOT&instId=BTC-USD",
+                        "header": "",
+                        "method": "GET",
+                        "body": ""
+                    }
+                ],
+                "responseResolves": [
+                    {
+                        "oneUrlResponseResolve": [
+                            {
+                                "keyName": "#reveal_id",
+                                "parseType": "",
+                                "parsePath": "$.data[0].baseCcy"
+                            }
+                        ]
+                    }
+                ],
+                "data": "{\"#reveal_id\":\"BTC\",\"#secp256k1\":\"[\\\"04559669c300aa13e4366075399b4f6b62e11332321f4eeaca774740d7066c08b8757abf62484b9b2662b82b12ef96df97d48117cccd09bc38c5ced34a085ce5a8\\\"]\"}",
+                "attConditions": "",
+                "timestamp": 1764323979583,
+                "additionParams": "{\"algorithmType\":\"proxytls\"}"
+            },
+            "attestor": "0xd5c9146701aebf4d04251b14b0df6730db373dfa",
+            "signature": "0x226feb6ad4908aa4f7dbd81519741f8e537062f5d63bd2b468eb2aed9d72627f4f98d9f7cc2133456ee2d6d739fdd1c3ee654c1c13a3347f6e22636423cef1421b",
+            "reportTxHash": "0x7610dc28e7da2bf25789eb6c12e3192f8d56358c9034fcb4613e78865494b8df",
+            "taskId": "0x845d3b2ab63c3f1569508e6fab1795161707a57b03e72ead3172dc773a7c2c9d",
+            "attestationTime": 6006,
+            "attestorUrl": "test-network-node1.primuslabs.xyz"
+        }
+    ],
+    "private_data": [
+        {
+            "id": "#secp256k1",
+            "random": [
+                "f67c9ba671039838ff6b1d0bd020932bc445fb224d230f4153aff82a780184bc"
+            ],
+            "content": "{\"data\":[{\"baseCcy\":\"BTC\"}]}"
+        }
+    ]
 }

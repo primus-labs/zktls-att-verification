@@ -147,7 +147,7 @@ impl Attestation {
 
         let signer_addr = signer_addr.strip_prefix("0x").unwrap_or(signer_addr);
         let signer_addr = hex::decode(signer_addr)?;
-        if signer_addr != address {
+        if signer_addr == address {
             return Ok(());
         }
 
