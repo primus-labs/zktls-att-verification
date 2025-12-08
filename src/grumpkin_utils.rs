@@ -84,7 +84,11 @@ pub fn split_json_response(json_response: &String, batch_size: usize) -> anyhow:
     println!("grumpkin x: {:?}", g.x);
     println!("grumpkin y: {:?}", g.y);
 
-    println!("json response: {}", json_response);
+    println!(
+        "json response: {}, len: {}",
+        json_response,
+        json_response.len()
+    );
     let mut vec = vec![];
     let mut bytes = json_response.as_bytes().to_vec();
     bytes.reverse();

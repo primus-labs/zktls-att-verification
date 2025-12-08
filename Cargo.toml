@@ -68,3 +68,7 @@ path = "examples/attestation_secp256k1.rs"
 name = "attestation_grumpkin"
 path = "examples/attestation_grumpkin.rs"
 
+[[example]]
+name = "attestation_grumpkin_2kb"
+path = "examples/attestation_grumpkin_2kb.rs"
+
