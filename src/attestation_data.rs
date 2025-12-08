@@ -141,13 +141,20 @@ impl Attestation {
 
     // verify ecdsa signature by recovering signer address
     // and comparing with given address
-    fn verify_signature(&self, signer_addr: &str, signature: &str) -> Result<()> {
+    fn verify_signature(&self, signer_addr: &[String], signature: &str) -> Result<()> {
         let ecdsa_signature = ECDSASignature::from_hex(signature)?;
         let address = ecdsa_signature.recover(&self.hash()?)?;
 
-        let signer_addr = signer_addr.strip_prefix("0x").unwrap_or(signer_addr);
-        let signer_addr = hex::decode(signer_addr)?;
-        if signer_addr == address {
+        let signer_addr: anyhow::Result<Vec<_>> = signer_addr
+            .iter()
+            .map(|addr| {
+                let addr = addr.strip_prefix("0x").unwrap_or(addr);
+                hex::decode(addr).map_err(|e| anyhow::anyhow!("{:?}", e))
+            })
+            .collect();
+        let signer_addr = signer_addr?;
+
+        if signer_addr.iter().any(|addr| addr == &address) {
             return Ok(());
         }
 
@@ -197,14 +204,7 @@ impl Attestation {
     // check whether the attestation url is in the allowed url list
     fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
         for req in self.request.iter() {
-            let mut is_allowed = false;
-            for url in allowed_urls.iter() {
-                if req.url.starts_with(url) {
-                    is_allowed = true;
-                    break;
-                }
-            }
-            if !is_allowed {
+            if !allowed_urls.iter().any(|url| req.url.starts_with(url)) {
                 return Err(anyhow!("fail to check url: {}", req.url));
             }
         }
@@ -278,8 +278,8 @@ impl AttestationData {
 // `AttestationConfig` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AttestationConfig {
-    pub attestor_addr: String, // the attestor address
-    pub url: Vec<String>,      // the attestation url
+    pub attestor_addr: Vec<String>, // the attestor address
+    pub url: Vec<String>,           // the attestation url
 }
 
 pub fn verify_attestation_data(
