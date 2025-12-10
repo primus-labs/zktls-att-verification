@@ -50,7 +50,7 @@ impl ECDSASignature {
         let sig_hex = signature.strip_prefix("0x").unwrap_or(signature);
         let sig_bytes = <[u8; 65]>::from_hex(sig_hex)?;
         let v = i32::from((sig_bytes[64] - 27) % 4);
-        let recovery_id = ecdsa::RecoveryId::from_i32(v)?;
+        let recovery_id = ecdsa::RecoveryId::try_from(v)?;
         let sig = ecdsa::RecoverableSignature::from_compact(&sig_bytes[..64], recovery_id)?;
 
         Ok(Self {
