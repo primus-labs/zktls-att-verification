@@ -1,6 +1,6 @@
 {
     "verification_type": [
-        "SALTTED_HASH_COMPARSION"
+        "SALTED_HASH_COMPARISON"
     ],
     "public_data": [
         {
