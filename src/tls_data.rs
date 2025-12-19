@@ -75,7 +75,7 @@ impl VerificationType {
                     aes_key.clone(),
                 ))
             }
-            "HASH_COMPARSION" => {
+            "HASH_COMPARISON" => {
                 let Some(content) = &private_data.content else {
                     return Err(anyhow::anyhow!("content is empty"));
                 };
@@ -84,7 +84,7 @@ impl VerificationType {
                     content.clone(),
                 ))
             }
-            "SALTTED_HASH_COMPARSION" => {
+            "SALTED_HASH_COMPARISON" => {
                 let Some(content) = &private_data.content else {
                     return Err(anyhow::anyhow!("content is empty"));
                 };
