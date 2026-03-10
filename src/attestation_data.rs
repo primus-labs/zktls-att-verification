@@ -1,7 +1,9 @@
 use crate::ecdsa_utils::{encode_packed_address, encode_packed_u64, keccak256, ECDSASignature};
+use crate::sha_utils::sha256;
 use crate::tls_data::{JsonData, PrivateData, TLSData, TLSDataOpt};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 // `RequestData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -122,6 +124,22 @@ impl PublicData {
         Err(anyhow!("fail to verify signature"))
     }
 
+    fn verify_hash(&self, id: &str, content: &str) -> Result<Vec<JsonData>> {
+        let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
+        let expected_hash = sha256(content);
+        let committed_hash = json_value.get(id);
+        if let Some(committed_hash) = committed_hash {
+            let decoded_hash = hex::decode(committed_hash.as_str().unwrap())?;
+            if decoded_hash == expected_hash {
+                let json_data = JsonData::from_str(content)?;
+                return Ok(vec![json_data]);
+            } else {
+                println!("not equal");
+            }
+        }
+        Err(anyhow::anyhow!("verify hash failed"))
+    }
+
     // verify aes ciphertext: decrypt aes ciphertext
     // and check whether it is a valid json string
     fn verify_aes_ciphertext(&self, aes_key: &str) -> Result<Vec<JsonData>> {
@@ -157,10 +175,24 @@ impl PublicData {
     }
 
     // verify the attestation, including attestation url, ecdsa signature and aes ciphertext
-    pub fn verify(&self, config: &AttestationConfig, aes_key: &str) -> Result<Vec<JsonData>> {
+    pub fn verify(
+        &self,
+        config: &AttestationConfig,
+        private_data: &PrivateData,
+    ) -> Result<Vec<JsonData>> {
         self.verify_url(&config.url)?;
         self.verify_signature(&config.attestor_addr)?;
-        self.verify_aes_ciphertext(aes_key)
+        if let Some(aes_key) = &private_data.aes_key {
+            self.verify_aes_ciphertext(aes_key)
+        } else if let Some(content) = &private_data.content {
+            if let Some(id) = &private_data.id {
+                self.verify_hash(id, content)
+            } else {
+                Err(anyhow!("can not find id"))
+            }
+        } else {
+            Err(anyhow!("can not find content"))
+        }
     }
 }
 
@@ -175,7 +207,7 @@ pub struct AttestationData {
 impl AttestationData {
     // verify the attestation
     pub fn verify(&self, config: &AttestationConfig) -> Result<Vec<JsonData>> {
-        self.public_data.verify(config, &self.private_data.aes_key)
+        self.public_data.verify(config, &self.private_data)
     }
 }
 

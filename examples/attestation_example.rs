@@ -5,7 +5,7 @@ use zktls_att_verification::attestation_data;
 
 fn main() -> Result<()> {
     // read attestion data
-    let attestation_data = fs::read_to_string("data/attestation_data.json")?;
+    let attestation_data = fs::read_to_string("data/attestation_data_hash.json")?;
     // read attestation config
     let attestation_config = fs::read_to_string("data/config.json")?;
 

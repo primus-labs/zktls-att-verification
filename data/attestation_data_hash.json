@@ -1,0 +1,36 @@
+{
+    "public_data": {
+        "recipient": "0xB12a1f7035FdCBB4cC5Fa102C01346BD45439Adf",
+        "request": {
+          "url": "https://www.binance.com/bapi/kyc/v2/private/certificate/user-kyc/current-kyc-status",
+          "header": "",
+          "method": "POST",
+          "body": "{}"
+        },
+        "reponseResolve": [
+          {
+            "keyName": "kycStatus",
+            "parseType": "",
+            "parsePath": "{\"type\":\"FIELD_ARITHMETIC\",\"op\":\"SHA256\",\"field\":\"$.data.kycStatus\"}"
+          }
+        ],
+        "data": "{\"kycStatus\":\"6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b\",\"kycStatus.count\":\"1\"}",
+        "attConditions": "[{\"op\":\"REVEAL_HEX_STRING\",\"field\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256\\\",\\\"field\\\":\\\"$.data.kycStatus\\\"}\"}]",
+        "timestamp": 1773129375244,
+        "additionParams": "{\"algorithmType\":\"proxytls\"}",
+        "attestors": [
+          {
+            "attestorAddr": "0xe02bd7a6c8aa401189aebb5bad755c2610940a73",
+            "url": "https://primuslabs.xyz"
+          }
+        ],
+        "signatures": [
+          "0x339bf4cd4fc96c675e73487f2db2c48956c110e704fb0302bbf0f2403489a70225d0be7a0be2ea28dbd4e00a1becfee5f604f75a2ef838e4f52af0785e90dd9f1b"
+        ],
+        "requestid": "dafadbb4-b216-4867-b115-9053eb4bd3cd"
+    },
+    "private_data": {
+        "id": "kycStatus",
+        "content": "1"
+    }
+}

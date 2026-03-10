@@ -98,7 +98,9 @@ impl TLSData {
 // `PrivateData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PrivateData {
-    pub aes_key: String, // aes key
+    pub aes_key: Option<String>, // aes key
+    pub id: Option<String>,
+    pub content: Option<String>,
 }
 
 // `FullTLSData` definitions
@@ -111,7 +113,8 @@ pub struct FullTLSData {
 // `FullTLSData` implementations
 impl FullTLSData {
     pub fn verify(&self) -> Result<Vec<JsonData>> {
-        self.tls_data.verify(&self.private_data.aes_key)
+        self.tls_data
+            .verify(&self.private_data.aes_key.as_ref().unwrap())
     }
 }
 
@@ -177,6 +180,7 @@ pub struct PartialTLSData {
 // `PartialTLSData` implementations
 impl PartialTLSData {
     pub fn verify(&self) -> Result<Vec<JsonData>> {
-        self.tls_data.verify(&self.private_data.aes_key)
+        self.tls_data
+            .verify(&self.private_data.aes_key.as_ref().unwrap())
     }
 }
