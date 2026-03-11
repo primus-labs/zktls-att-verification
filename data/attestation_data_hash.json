@@ -29,8 +29,8 @@
         ],
         "requestid": "dafadbb4-b216-4867-b115-9053eb4bd3cd"
     },
-    "private_data": {
+    "private_data": [{
         "id": "kycStatus",
         "content": "1"
-    }
+    }]
 }

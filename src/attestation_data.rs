@@ -178,29 +178,34 @@ impl PublicData {
     pub fn verify(
         &self,
         config: &AttestationConfig,
-        private_data: &PrivateData,
+        private_datas: &Vec<PrivateData>,
     ) -> Result<Vec<JsonData>> {
         self.verify_url(&config.url)?;
         self.verify_signature(&config.attestor_addr)?;
-        if let Some(aes_key) = &private_data.aes_key {
-            self.verify_aes_ciphertext(aes_key)
-        } else if let Some(content) = &private_data.content {
-            if let Some(id) = &private_data.id {
-                self.verify_hash(id, content)
+        let mut result = vec![];
+        for private_data in private_datas.iter() {
+            let json_data = if let Some(aes_key) = &private_data.aes_key {
+                self.verify_aes_ciphertext(aes_key)?
+            } else if let Some(content) = &private_data.content {
+                if let Some(id) = &private_data.id {
+                    self.verify_hash(id, content)?
+                } else {
+                    return Err(anyhow!("can not find id"));
+                }
             } else {
-                Err(anyhow!("can not find id"))
-            }
-        } else {
-            Err(anyhow!("can not find content"))
+                return Err(anyhow!("can not find content"));
+            };
+            result.extend(json_data);
         }
+        Ok(result)
     }
 }
 
 // `AttestationData` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AttestationData {
-    pub public_data: PublicData,   // public data
-    pub private_data: PrivateData, // private data, including aes key
+    pub public_data: PublicData,        // public data
+    pub private_data: Vec<PrivateData>, // private data, including aes key
 }
 
 // `AttestiongData`` implementations
