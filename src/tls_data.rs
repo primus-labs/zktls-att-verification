@@ -100,7 +100,7 @@ impl TLSData {
 pub struct PrivateData {
     pub aes_key: Option<String>, // aes key
     pub id: Option<String>,
-    pub content: Option<String>,
+    pub content: Option<Vec<String>>,
     pub salt: Option<String>,
 }
 

@@ -1,36 +1,54 @@
 {
-    "public_data": {
-        "recipient": "0xB12a1f7035FdCBB4cC5Fa102C01346BD45439Adf",
-        "request": {
-          "url": "https://www.binance.com/bapi/kyc/v2/private/certificate/user-kyc/current-kyc-status",
-          "header": "",
-          "method": "POST",
-          "body": "{}"
-        },
-        "reponseResolve": [
-          {
-            "keyName": "kycStatus",
-            "parseType": "",
-            "parsePath": "{\"type\":\"FIELD_ARITHMETIC\",\"op\":\"SHA256\",\"field\":\"$.data.kycStatus\"}"
-          }
-        ],
-        "data": "{\"kycStatus\":\"6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b\",\"kycStatus.count\":\"1\"}",
-        "attConditions": "[{\"op\":\"REVEAL_HEX_STRING\",\"field\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256\\\",\\\"field\\\":\\\"$.data.kycStatus\\\"}\"}]",
-        "timestamp": 1773129375244,
-        "additionParams": "{\"algorithmType\":\"proxytls\"}",
-        "attestors": [
-          {
-            "attestorAddr": "0xe02bd7a6c8aa401189aebb5bad755c2610940a73",
-            "url": "https://primuslabs.xyz"
-          }
-        ],
-        "signatures": [
-          "0x339bf4cd4fc96c675e73487f2db2c48956c110e704fb0302bbf0f2403489a70225d0be7a0be2ea28dbd4e00a1becfee5f604f75a2ef838e4f52af0785e90dd9f1b"
-        ],
-        "requestid": "dafadbb4-b216-4867-b115-9053eb4bd3cd"
+  "public_data": {
+    "recipient": "0xB12a1f7035FdCBB4cC5Fa102C01346BD45439Adf",
+    "request": {
+      "url": "https://github.com/_global-navigation/payloads.json?return_to=https%3A%2F%2Fgithub.com%2F&type=user_menu",
+      "header": "",
+      "method": "GET",
+      "body": ""
     },
-    "private_data": [{
-        "id": "kycStatus",
-        "content": "1"
-    }]
+    "reponseResolve": [
+      {
+        "keyName": "github_id",
+        "parseType": "",
+        "parsePath": "{\"type\":\"FIELD_ARITHMETIC\",\"op\":\"SHA256_WITH_SALT\",\"field\":\"$.owner.avatarUrl\"}"
+      }
+    ],
+    "data": "{\"github_id_in_html\":\"bd219fed0312ff01b05f402f2e295c542b41df0e359abd35ae9935f06cf3fa00\",\"contribution\":\"05120edc8da9821186fdfd186a2e379e8d595f6e6a7fa93c8022df451d2eb83c\",\"github_id\":\"f80d965ef9d65e8226a1a03a2b46792f0837c43823eefbef52a75877062ec9bb\",\"years\":\"270d2d4555aba46ca4332a69cac164415d37f21e2dddb74c1e62dc952287e4e3\"}",
+    "attConditions": "[{\"op\":\"REVEAL_SALTTED_HASH\",\"field\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256_WITH_SALT\\\",\\\"field\\\":\\\"$.owner.avatarUrl\\\"}\"},{\"op\":\"REVEAL_SALTTED_HASH\",\"field\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256_WITH_SALT\\\",\\\"field\\\":\\\"//h2[@id=\\\\\\\"js-contribution-activity-description\\\\\\\"]\\\"}\"},{\"op\":\"REVEAL_SALTTED_HASH\",\"field\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256_WITH_SALT\\\",\\\"field\\\":\\\"//div[@id=\\\\\\\"year-list-container\\\\\\\"]//ul[@class=\\\\\\\"filter-list small\\\\\\\"]/li[*]/a\\\"}\"},{\"op\":\"REVEAL_SALTTED_HASH\",\"field\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256_WITH_SALT\\\",\\\"field\\\":\\\"//a[@id=\\\\\\\"year-link-2026\\\\\\\"]/@data-hydro-click\\\"}\"}]",
+    "timestamp": 1773288670605,
+    "additionParams": "{\"algorithmType\":\"proxytls\",\"requests[1].url\":\"https://github.com/ehisper?action=show&controller=profiles&tab=contributions&user_id=ehisper\",\"requests[1].method\":\"GET\",\"requests[1].body\":\"\",\"requests[1].header\":\"\",\"reponseResolves[1][0].keyName\":\"contribution\",\"reponseResolves[1][0].parseType\":\"\",\"reponseResolves[1][0].parsePath\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256_WITH_SALT\\\",\\\"field\\\":\\\"//h2[@id=\\\\\\\"js-contribution-activity-description\\\\\\\"]\\\"}\",\"reponseResolves[1][1].keyName\":\"years\",\"reponseResolves[1][1].parseType\":\"\",\"reponseResolves[1][1].parsePath\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256_WITH_SALT\\\",\\\"field\\\":\\\"//div[@id=\\\\\\\"year-list-container\\\\\\\"]//ul[@class=\\\\\\\"filter-list small\\\\\\\"]/li[*]/a\\\"}\",\"reponseResolves[1][2].keyName\":\"github_id_in_html\",\"reponseResolves[1][2].parseType\":\"\",\"reponseResolves[1][2].parsePath\":\"{\\\"type\\\":\\\"FIELD_ARITHMETIC\\\",\\\"op\\\":\\\"SHA256_WITH_SALT\\\",\\\"field\\\":\\\"//a[@id=\\\\\\\"year-link-2026\\\\\\\"]/@data-hydro-click\\\"}\"}",
+    "attestors": [
+      {
+        "attestorAddr": "0xe02bd7a6c8aa401189aebb5bad755c2610940a73",
+        "url": "https://primuslabs.xyz"
+      }
+    ],
+    "signatures": [
+      "0x05ecdede4f6d04e99606197c386f5b985cfe4d69434997468a17770d8d9696047b7e3e4d0f86d79d67fc2e0fbdd9c6fc605fa7e5322b22a00951a1f728111f9a1c"
+    ],
+    "requestid": "0bf1c21f-01e6-4ebc-95ed-dc3af43aaf26"
+  },
+  "private_data": [
+    {
+      "id": "contribution",
+      "salt": "5783d8dbbacdde5df1797d755e6d03ac",
+      "content": ["20\n      contributions\n        in the last year"]
+    },
+    {
+      "id": "github_id",
+      "salt": "2a11b013fc5a08e128d6c0f52c0450df",
+      "content": ["https://avatars.githubusercontent.com/u/25573916?v=4"]
+    },
+    {
+      "id": "github_id_in_html",
+      "salt": "f7f3fa501bfd101ae69bda3b9cef34f1",
+      "content": ["{&quot;event_type&quot;:&quot;user_profile.click&quot;,&quot;payload&quot;:{&quot;profile_user_id&quot;:25573916,&quot;target&quot;:&quot;CONTRIBUTION_YEAR_LINK&quot;,&quot;user_id&quot;:25573916,&quot;originating_url&quot;:&quot;https://github.com/ehisper?action=show&amp;controller=profiles&amp;tab=contributions&amp;user_id=ehisper&quot;}}"]
+    },
+    {
+      "id": "years",
+      "salt": "464ca59b0e27e108bb46713c0335e9dc",
+      "content": ["2026","2025","2024","2023","2022","2021","2020","2019","2018","2017"]
+    }
+  ]
 }
