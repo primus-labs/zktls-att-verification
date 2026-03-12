@@ -124,17 +124,26 @@ impl PublicData {
         Err(anyhow!("fail to verify signature"))
     }
 
-    fn verify_hash(&self, id: &str, content: &str) -> Result<Vec<JsonData>> {
+    fn verify_hash(
+        &self,
+        id: &str,
+        content: &str,
+        private_data: &PrivateData,
+    ) -> Result<Vec<JsonData>> {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
         let expected_hash = sha256(content);
         let committed_hash = json_value.get(id);
         if let Some(committed_hash) = committed_hash {
-            let decoded_hash = hex::decode(committed_hash.as_str().unwrap())?;
+            let decoded_hash = hex::decode(
+                committed_hash
+                    .as_str()
+                    .ok_or(anyhow::anyhow!("get string error"))?,
+            )?;
             if decoded_hash == expected_hash {
-                let json_data = JsonData::from_str(content)?;
+                let private_data = serde_json::to_value(&private_data)?;
+                let private_data = private_data.to_string();
+                let json_data = JsonData::from_str(&private_data)?;
                 return Ok(vec![json_data]);
-            } else {
-                println!("not equal");
             }
         }
         Err(anyhow::anyhow!("verify hash failed"))
@@ -188,7 +197,7 @@ impl PublicData {
                 self.verify_aes_ciphertext(aes_key)?
             } else if let Some(content) = &private_data.content {
                 if let Some(id) = &private_data.id {
-                    self.verify_hash(id, content)?
+                    self.verify_hash(id, content, &private_data)?
                 } else {
                     return Err(anyhow!("can not find id"));
                 }
