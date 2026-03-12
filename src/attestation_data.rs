@@ -1,5 +1,5 @@
 use crate::ecdsa_utils::{encode_packed_address, encode_packed_u64, keccak256, ECDSASignature};
-use crate::sha_utils::sha256;
+use crate::sha_utils::{sha256, sha256_with_salt};
 use crate::tls_data::{JsonData, PrivateData, TLSData, TLSDataOpt};
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
@@ -131,7 +131,11 @@ impl PublicData {
         private_data: &PrivateData,
     ) -> Result<Vec<JsonData>> {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
-        let expected_hash = sha256(content);
+        let expected_hash = if let Some(salt) = &private_data.salt {
+            sha256_with_salt(content, salt)?
+        } else {
+            sha256(content)
+        };
         let committed_hash = json_value.get(id);
         if let Some(committed_hash) = committed_hash {
             let decoded_hash = hex::decode(
