@@ -180,12 +180,29 @@ impl PublicData {
 
     // check whether the attestation url is in the allowed url list
     fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
-        for url in allowed_urls.iter() {
-            if self.request.url.starts_with(url) {
-                return Ok(());
+        let addition_params: serde_json::Value = serde_json::from_str(&self.additionParams)?;
+        for (index, url) in allowed_urls.iter().enumerate() {
+            if index == 0 {
+                if !self.request.url.starts_with(url) {
+                    return Err(anyhow!("fail to verify url"));
+                }
+            } else {
+                let key = format!("requests[{}].url", index);
+                let actual_url = addition_params.get(&key);
+                if let Some(actual_url) = actual_url {
+                    let actual_url = match actual_url {
+                        serde_json::Value::String(s) => s.clone(),
+                        _ => actual_url.to_string(),
+                    };
+                    if !actual_url.starts_with(url) {
+                        return Err(anyhow!("fail to verify url"));
+                    }
+                } else {
+                    return Err(anyhow!("fail to verify url"));
+                }
             }
         }
-        Err(anyhow!("fail to check url"))
+        Ok(())
     }
 
     fn verify_att_conditions(&self, expected_conditions: &[serde_json::Value]) -> Result<()> {
