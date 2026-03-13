@@ -131,10 +131,11 @@ impl PublicData {
         private_data: &PrivateData,
     ) -> Result<Vec<JsonData>> {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
+        let to_hash = content.join(":");
         let expected_hash = if let Some(salt) = &private_data.salt {
-            sha256_with_salt(&content[0], salt)?
+            sha256_with_salt(&to_hash, salt)?
         } else {
-            sha256(&content[0])
+            sha256(&to_hash)
         };
         let committed_hash = json_value.get(id);
         if let Some(committed_hash) = committed_hash {
