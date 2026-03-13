@@ -131,10 +131,11 @@ impl PublicData {
         private_data: &PrivateData,
     ) -> Result<Vec<JsonData>> {
         let json_value: serde_json::Value = serde_json::from_str(&self.data)?;
+        let to_hash = content.join(":");
         let expected_hash = if let Some(salt) = &private_data.salt {
-            sha256_with_salt(&content[0], salt)?
+            sha256_with_salt(&to_hash, salt)?
         } else {
-            sha256(&content[0])
+            sha256(&to_hash)
         };
         let committed_hash = json_value.get(id);
         if let Some(committed_hash) = committed_hash {
@@ -179,12 +180,44 @@ impl PublicData {
 
     // check whether the attestation url is in the allowed url list
     fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
-        for url in allowed_urls.iter() {
-            if self.request.url.starts_with(url) {
-                return Ok(());
+        let addition_params: serde_json::Value = serde_json::from_str(&self.additionParams)?;
+        for (index, url) in allowed_urls.iter().enumerate() {
+            if index == 0 {
+                if !self.request.url.starts_with(url) {
+                    return Err(anyhow!("fail to verify url"));
+                }
+            } else {
+                let key = format!("requests[{}].url", index);
+                let actual_url = addition_params.get(&key);
+                if let Some(actual_url) = actual_url {
+                    let actual_url = match actual_url {
+                        serde_json::Value::String(s) => s.clone(),
+                        _ => actual_url.to_string(),
+                    };
+                    if !actual_url.starts_with(url) {
+                        return Err(anyhow!("fail to verify url"));
+                    }
+                } else {
+                    return Err(anyhow!("fail to verify url"));
+                }
             }
         }
-        Err(anyhow!("fail to check url"))
+        Ok(())
+    }
+
+    fn verify_att_conditions(&self, expected_conditions: &[serde_json::Value]) -> Result<()> {
+        let att_conditions: Vec<serde_json::Value> =
+            serde_json::from_str(&self.attConditions).unwrap();
+        let condition_pairs: Vec<(&serde_json::Value, &serde_json::Value)> = att_conditions
+            .iter()
+            .zip(expected_conditions.iter())
+            .collect();
+        for (actual, expected) in condition_pairs.into_iter() {
+            if actual.to_string() != expected.to_string() {
+                return Err(anyhow!("fail to check conditions"));
+            }
+        }
+        Ok(())
     }
 
     // verify the attestation, including attestation url, ecdsa signature and aes ciphertext
@@ -194,6 +227,7 @@ impl PublicData {
         private_datas: &Vec<PrivateData>,
     ) -> Result<Vec<JsonData>> {
         self.verify_url(&config.url)?;
+        self.verify_att_conditions(&config.conditions)?;
         self.verify_signature(&config.attestor_addr)?;
         let mut result = vec![];
         for private_data in private_datas.iter() {
@@ -232,8 +266,9 @@ impl AttestationData {
 // `AttestationConfig` definition
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AttestationConfig {
-    pub attestor_addr: String, // the attestor address
-    pub url: Vec<String>,      // the attestation url
+    pub attestor_addr: String,              // the attestor address
+    pub url: Vec<String>,                   // the attestation url
+    pub conditions: Vec<serde_json::Value>, // the attestation conditions
 }
 
 pub fn verify_attestation_data(
