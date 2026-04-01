@@ -182,8 +182,9 @@ impl PublicData {
     fn verify_url(&self, allowed_urls: &[String]) -> Result<()> {
         let addition_params: serde_json::Value = serde_json::from_str(&self.additionParams)?;
         for (index, url) in allowed_urls.iter().enumerate() {
+            let matcher = URLMatcher::new(url)?;
             if index == 0 {
-                if !self.request.url.starts_with(url) {
+                if !matcher.is_match(&self.request.url)? {
                     return Err(anyhow!("fail to verify url"));
                 }
             } else {
@@ -194,7 +195,7 @@ impl PublicData {
                         serde_json::Value::String(s) => s.clone(),
                         _ => actual_url.to_string(),
                     };
-                    if !actual_url.starts_with(url) {
+                    if !matcher.is_match(&actual_url)? {
                         return Err(anyhow!("fail to verify url"));
                     }
                 } else {
@@ -245,6 +246,31 @@ impl PublicData {
             result.extend(json_data);
         }
         Ok(result)
+    }
+}
+
+enum URLMatcher {
+    StringStartsWith(String),
+    RegexMatch(regex::Regex),
+}
+
+impl URLMatcher {
+    fn new(url_pattern: &str) -> Result<Self> {
+        if url_pattern.starts_with(r"<REGEX>") {
+            let re = regex::Regex::new(&url_pattern[7..])?;
+            return Ok(URLMatcher::RegexMatch(re));
+        }
+        Ok(URLMatcher::StringStartsWith(url_pattern.to_string()))
+    }
+
+    fn is_match(&self, url: &str) -> Result<bool> {
+        match self {
+            URLMatcher::StringStartsWith(expected_url) => {
+                let b = url.starts_with(expected_url);
+                Ok(b)
+            }
+            URLMatcher::RegexMatch(re) => Ok(re.is_match(url)),
+        }
     }
 }
 
